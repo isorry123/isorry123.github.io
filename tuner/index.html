@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands-Free Accordion Tuner</title>
+    <style>
+        :root { --accent: #00f2ff; --bg: #0f0f0f; --panel: #1a1a1a; --text: #e0e0e0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        #tuner-ui { background: var(--panel); border-radius: 16px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); width: 100%; max-width: 480px; text-align: center; border: 1px solid #333; }
+        
+        .status-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; background: #333; }
+        .status-listening { background: #28a745; color: white; }
+        .status-locked { background: #f39c12; color: white; }
+
+        canvas { width: 100%; height: 80px; background: #000; border-radius: 6px; margin-bottom: 15px; border: 1px solid #333; }
+        
+        .note-display { font-size: 6rem; color: #fff; line-height: 1; margin: 0; text-shadow: 0 0 20px var(--accent); font-weight: bold; }
+        .freq-display { font-size: 1.2rem; color: #888; font-family: monospace; margin-bottom: 10px; }
+
+        .meter-box { width: 100%; height: 50px; background: #000; position: relative; border-radius: 8px; margin: 15px 0; border: 1px solid #333; overflow: hidden; }
+        #needle { width: 3px; height: 100%; background: #ff3e3e; position: absolute; left: 50%; transform: translateX(-50%); transition: left 0.15s ease-out; z-index: 2; }
+        .center-mark { position: absolute; left: 50%; width: 2px; height: 100%; background: var(--accent); opacity: 0.5; }
+
+        button { padding: 14px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; }
+        .btn-main { background: var(--accent); color: #000; font-size: 1.2rem; }
+        .btn-reset { background: #444; color: #fff; }
+        
+        #beat-info { margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: var(--accent); min-height: 1.5em; }
+
+        table { width: 100%; max-width: 480px; margin-top: 25px; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        th { background: #222; color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div id="tuner-ui">
+        <div id="status" class="status-pill">MICROPHONE OFF</div>
+        
+        <canvas id="spectrum"></canvas>
+
+        <div id="note" class="note-display">--</div>
+        <div id="freq" class="freq-display">0.00 Hz</div>
+        
+        <div class="meter-box">
+            <div class="center-mark"></div>
+            <div id="needle"></div>
+        </div>
+
+        <div id="beat-info"></div>
+
+        <button id="start-btn" class="btn-main">START HANDS-FREE MODE</button>
+        <button id="reset-btn" class="btn-reset" style="display:none;">UNFREEZE / NEXT NOTE</button>
+        
+        <p style="font-size: 0.8rem; color: #666; margin-top: 15px;">
+            How it works: Play a note. When the sound stops, the tuner will automatically <b>LOCK</b> the last stable reading.
+        </p>
+    </div>
+
+    <table id="report-table">
+        <thead>
+            <tr><th>Note</th><th>Hz</th><th>Cents</th><th>Beats</th></tr>
+        </thead>
+        <tbody id="report-body"></tbody>
+    </table>
+
+    <script>
+        let audioCtx, analyser, dataArray;
+        let isLocked = false;
+        let silenceTimer = null;
+        let beatBuffer = [];
+        let history = JSON.parse(localStorage.getItem('accordion_handsfree') || '[]');
+        
+        const canvas = document.getElementById('spectrum');
+        const ctx = canvas.getContext('2d');
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        let lastStableData = null;
+
+        async function init() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+            });
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 16384; 
+            source.connect(analyser);
+            dataArray = new Float32Array(analyser.frequencyBinCount);
+            
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'block';
+            document.getElementById('status').innerText = "LISTENING...";
+            document.getElementById('status').classList.add('status-listening');
+            tick();
+        }
+
+        function interpolate(binIndex) {
+            const y0 = dataArray[binIndex - 1], y1 = dataArray[binIndex], y2 = dataArray[binIndex + 1];
+            const p = 0.5 * (y0 - y2) / (y0 - 2 * y1 + y2);
+            return (binIndex + p) * (audioCtx.sampleRate / analyser.fftSize);
+        }
+
+        function tick() {
+            if (!isLocked) {
+                analyser.getFloatFrequencyData(dataArray);
+                
+                // Draw Spec
+                ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath(); ctx.strokeStyle = '#00f2ff44';
+                for(let i=0; i<canvas.width; i++) {
+                    let val = dataArray[Math.floor(i * (dataArray.length/4)/canvas.width)];
+                    ctx.lineTo(i, canvas.height - ((val + 100) / 100) * canvas.height);
+                }
+                ctx.stroke();
+
+                let peaks = [];
+                let maxDb = -Infinity;
+                for (let i = 10; i < dataArray.length / 4; i++) {
+                    if (dataArray[i] > dataArray[i-1] && dataArray[i] > dataArray[i+1]) {
+                        if (dataArray[i] > -60) {
+                            peaks.push({ freq: interpolate(i), db: dataArray[i] });
+                            if (dataArray[i] > maxDb) maxDb = dataArray[i];
+                        }
+                    }
+                }
+
+                // SILENCE DETECTION: If volume drops, lock the last good reading
+                if (maxDb < -65) {
+                    if (!silenceTimer && lastStableData) {
+                        silenceTimer = setTimeout(() => {
+                            lockData();
+                        }, 500); // Wait 0.5s of silence to lock
+                    }
+                } else {
+                    clearTimeout(silenceTimer);
+                    silenceTimer = null;
+                    processPeaks(peaks);
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+
+        function processPeaks(peaks) {
+            if (peaks.length === 0) return;
+            peaks.sort((a,b) => b.db - a.db);
+            let fundamental = peaks.slice(0, 5).sort((a,b) => a.freq - b.freq)[0];
+            let neighbor = peaks.find(p => p !== fundamental && Math.abs(p.freq - fundamental.freq) < 30 && Math.abs(p.freq - fundamental.freq) > 0.5);
+
+            const n = 12 * (Math.log2(fundamental.freq / 440)) + 69;
+            const cents = Math.round((n - Math.round(n)) * 100);
+            
+            let beat = neighbor ? Math.abs(fundamental.freq - neighbor.freq) : 0;
+            if (beat > 0) {
+                beatBuffer.push(beat);
+                if (beatBuffer.length > 15) beatBuffer.shift();
+            }
+            let avgBeat = beatBuffer.length > 5 ? (beatBuffer.reduce((a,b)=>a+b)/beatBuffer.length).toFixed(2) : "0.00";
+
+            lastStableData = {
+                note: NOTES[Math.round(n)%12] + (Math.floor(n/12-1)),
+                freq: fundamental.freq.toFixed(2),
+                cents: cents,
+                beats: avgBeat
+            };
+
+            document.getElementById('note').innerText = lastStableData.note;
+            document.getElementById('freq').innerText = lastStableData.freq + " Hz";
+            document.getElementById('needle').style.left = (50 + cents) + "%";
+            document.getElementById('beat-info').innerText = avgBeat > 0 ? "TREMOLO: " + avgBeat + " Hz" : "";
+        }
+
+        function lockData() {
+            if (!lastStableData || isLocked) return;
+            isLocked = true;
+            document.getElementById('status').innerText = "LOCKED & SAVED";
+            document.getElementById('status').className = "status-pill status-locked";
+            
+            history.push({...lastStableData, time: new Date().toLocaleTimeString()});
+            localStorage.setItem('accordion_handsfree', JSON.stringify(history));
+            updateTable();
+        }
+
+        function updateTable() {
+            document.getElementById('report-body').innerHTML = history.slice().reverse().map(r => `
+                <tr><td>${r.note}</td><td>${r.freq}</td><td>${r.cents > 0 ? '+'+r.cents : r.cents}</td><td>${r.beats > 0 ? r.beats : '-'}</td></tr>
+            `).join('');
+        }
+
+        document.getElementById('reset-btn').onclick = () => {
+            isLocked = false;
+            lastStableData = null;
+            beatBuffer = [];
+            document.getElementById('status').innerText = "LISTENING...";
+            document.getElementById('status').className = "status-pill status-listening";
+        };
+
+        document.getElementById('start-btn').onclick = init;
+    </script>
+</body>
+</html>
