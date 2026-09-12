@@ -1,6 +1,8 @@
 # Watchbill Maker
 
-A browser-based tool for building and rotating a watch, quarter & station bill. Manage your roster, track qualifications and under-instruction status, auto-rotate the watch schedule, swap out sick or incapacitated personnel, and print/save the bill as a PDF.
+I am a 12 year submarine veteran and I know how frustrating it is to make in-port and out at sea watch bills. This app tries to solve that issue and free up some of your time so you can go back to burning flicks.
+
+This is a browser-based tool for building and rotating a watch, quarter & station bill. Manage your roster, track qualifications and under-instruction status, auto-rotate the watch schedule, swap out sick or incapacitated personnel, and print/save the bill as a PDF. I vibe coded this. I believe its 'pretty good'. If you want to tinker with it - by all means, go ahead.
 
 ## Your data never leaves your device
 
@@ -30,7 +32,7 @@ Yes — this is a plain HTML/CSS/JS app with no build step and no dependencies, 
 2. Unzip it anywhere on your computer.
 3. Open `index.html` by double-clicking it. It opens in your default browser and just works — no server, no install, no internet connection required.
 
-That local copy is completely independent from the GitHub Pages version — they don't share data (different browser storage, tied to the file's location), so think of the GitHub Pages link as the "always up to date, share with anyone" version, and your downloaded copy as your own private, fully offline instance.
+That local copy is completely independent from the GitHub Pages version — they don't share data (different browser storage, tied to the file's location), if you are going underway, it would be best to download a local copy.
 
 ## What this means for shared or public computers
 
