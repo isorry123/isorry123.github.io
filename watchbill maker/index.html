@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Watchbill Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">⚓</span>
+      <span class="brand-text">WATCHBILL<br/>MAKER</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="roster">Roster</button>
+      <button class="nav-btn" data-tab="stations">Watch Stations</button>
+      <button class="nav-btn" data-tab="watchbill">Watchbill</button>
+      <button class="nav-btn" data-tab="swap">Swap / Sick</button>
+    </nav>
+    <div class="sidebar-footer">
+      <p class="sidebar-note">All data is stored only in this browser. Nothing leaves your machine.</p>
+      <button class="btn btn--ghost btn--block" id="resetDataBtn">Reset All Data</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="masthead no-print">
+      <div class="masthead-field">
+        <label for="unitName">Unit</label>
+        <input id="unitName" type="text" />
+      </div>
+      <div class="masthead-field">
+        <label for="billDate">Date</label>
+        <input id="billDate" type="date" />
+      </div>
+    </header>
+
+    <!-- ROSTER -->
+    <section id="tab-roster" class="tab-panel active">
+      <h1>Roster</h1>
+      <p class="lede">Add every person who can stand a watch, then set what they're qualified for — or under instruction on — for each station.</p>
+
+      <div id="rosterTableWrap" class="table-scroll"></div>
+
+      <form id="addCrewForm" class="inline-form">
+        <input id="newCrewName" type="text" placeholder="Name" required />
+        <input id="newCrewRank" type="text" placeholder="Rank / Rate" />
+        <button type="submit" class="btn btn--primary">Add Crew Member</button>
+      </form>
+    </section>
+
+    <!-- STATIONS -->
+    <section id="tab-stations" class="tab-panel">
+      <h1>Watch Stations</h1>
+      <p class="lede">Define the stations that need to be manned. Turn on "Allow UI seat" for stations where a trainee can stand watch alongside a qualified watchstander.</p>
+
+      <div id="stationsTableWrap" class="table-scroll"></div>
+
+      <form id="addStationForm" class="inline-form">
+        <input id="newStationName" type="text" placeholder="Station name" required />
+        <button type="submit" class="btn btn--primary">Add Station</button>
+      </form>
+    </section>
+
+    <!-- WATCHBILL -->
+    <section id="tab-watchbill" class="tab-panel">
+      <h1 class="no-print">Watchbill</h1>
+
+      <div class="panel no-print">
+        <h2>Watch periods</h2>
+        <div id="periodsWrap" class="table-scroll"></div>
+        <form id="addPeriodForm" class="inline-form">
+          <input id="newPeriodLabel" type="text" placeholder="Watch name" required />
+          <input id="newPeriodStart" type="time" required />
+          <input id="newPeriodEnd" type="time" required />
+          <button type="submit" class="btn btn--primary">Add Watch Period</button>
+        </form>
+      </div>
+
+      <div class="toolbar no-print">
+        <button id="autoRotateAllBtn" class="btn btn--accent">Auto-Rotate (regenerate all)</button>
+        <button id="autoRotateEmptyBtn" class="btn">Auto-Fill Empty Only</button>
+        <button id="clearWatchbillBtn" class="btn btn--danger">Clear Watchbill</button>
+        <span class="toolbar-spacer"></span>
+        <button id="exportPdfBtn" class="btn btn--ghost">Save as PDF</button>
+      </div>
+
+      <div id="watchbillGridWrap" class="table-scroll"></div>
+    </section>
+
+    <!-- SWAP -->
+    <section id="tab-swap" class="tab-panel">
+      <h1>Swap / Sick</h1>
+      <p class="lede">Mark someone sick, incapacitated, or on limited duty and the watchbill will try to backfill their watches with a qualified, available replacement.</p>
+
+      <div class="panel">
+        <div id="swapPersonSelect"></div>
+        <div id="swapResult" class="swap-result"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Current gaps</h2>
+        <div id="gapSummary"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/rotator.js"></script>
+<script src="js/roster.js"></script>
+<script src="js/stations.js"></script>
+<script src="js/watchbill.js"></script>
+<script src="js/swap.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
