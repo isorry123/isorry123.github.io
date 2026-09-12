@@ -4,8 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Watchbill Maker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -24,6 +22,9 @@
     </nav>
     <div class="sidebar-footer">
       <p class="sidebar-note">All data is stored only in this browser. Nothing leaves your machine.</p>
+      <button class="btn btn--ghost btn--block" id="exportJsonBtn">Export Backup (JSON)</button>
+      <button class="btn btn--ghost btn--block" id="importJsonBtn">Import Backup (JSON)</button>
+      <input type="file" id="importJsonInput" accept="application/json,.json" hidden />
       <button class="btn btn--ghost btn--block" id="resetDataBtn">Reset All Data</button>
     </div>
   </aside>

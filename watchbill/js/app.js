@@ -10,8 +10,6 @@ function switchTab(tabId) {
 function wireMasthead() {
   const unitInput = document.getElementById('unitName');
   const dateInput = document.getElementById('billDate');
-  unitInput.value = App.state.meta.unit;
-  dateInput.value = App.state.meta.date;
 
   unitInput.addEventListener('change', (e) => {
     App.state.meta.unit = e.target.value.trim() || 'UNNAMED UNIT';
@@ -77,10 +75,21 @@ function wireForms() {
 
   document.getElementById('exportPdfBtn').addEventListener('click', exportToPdf);
 
+  document.getElementById('exportJsonBtn').addEventListener('click', exportDataAsJson);
+
+  document.getElementById('importJsonBtn').addEventListener('click', () => {
+    document.getElementById('importJsonInput').click();
+  });
+  document.getElementById('importJsonInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) importDataFromJsonFile(file);
+    e.target.value = ''; // allow re-selecting the same file later
+  });
+
   document.getElementById('resetDataBtn').addEventListener('click', () => {
     if (confirm('Reset ALL data — roster, stations, and the watchbill? This cannot be undone.')) {
       App.reset();
-      boot();
+      renderAll();
     }
   });
 }
@@ -91,8 +100,11 @@ function wireNav() {
   });
 }
 
-function boot() {
-  wireMasthead();
+/* Re-render every tab from current App.state without re-attaching
+   event listeners. Safe to call repeatedly (Reset, Import, etc). */
+function renderAll() {
+  document.getElementById('unitName').value = App.state.meta.unit;
+  document.getElementById('billDate').value = App.state.meta.date;
   renderRoster();
   renderStations();
   renderWatchbill();
@@ -102,5 +114,6 @@ function boot() {
 document.addEventListener('DOMContentLoaded', () => {
   wireNav();
   wireForms();
-  boot();
+  wireMasthead();
+  renderAll();
 });

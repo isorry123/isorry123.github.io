@@ -17,9 +17,9 @@
   --qualified: #4e8b7b;
   --ui-gold: #c99a3e;
   --gap-red: #b0453b;
-  --font-head: "Archivo Narrow", sans-serif;
-  --font-body: "IBM Plex Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  --font-head: "Arial Narrow", "Helvetica Neue Condensed", Arial, sans-serif;
+  --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 * { box-sizing: border-box; }
@@ -112,6 +112,13 @@ html, body {
   color: var(--text-lo);
   line-height: 1.5;
   margin: 0 0 12px;
+}
+
+.sidebar-footer .btn--block {
+  margin-bottom: 8px;
+}
+.sidebar-footer .btn--block:last-child {
+  margin-bottom: 0;
 }
 
 /* ---------- Main content ---------- */
