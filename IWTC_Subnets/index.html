@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUBNET ARCHITECT // IPv4 VLSM Tactical Trainer</title>
+  <style>
+    /* =========================================================================
+       US NAVY TACTICAL DESIGN TOKENS & ZERO-DEPENDENCY STYLING
+       ========================================================================= */
+    :root {
+      --navy-950: #000d24;
+      --navy-900: #00205B; /* Official US Navy Blue */
+      --navy-850: #062766;
+      --navy-800: #0B337D;
+      --navy-700: #16469E;
+      --gold-600: #9E7714;
+      --gold-500: #C59B27; /* Official US Navy Gold */
+      --gold-400: #D4AF37; /* Metallic Gold */
+      --gold-300: #E6C75A;
+      --slate-950: #070B14;
+      --slate-900: #0E1525;
+      --slate-850: #141D31;
+      --slate-800: #1C2740;
+      --slate-700: #2C3B5E;
+      --slate-400: #94A3B8;
+      --slate-300: #CBD5E1;
+      --slate-100: #F1F5F9;
+      --emerald-500: #10B981;
+      --emerald-400: #34D399;
+      --rose-500: #F43F5E;
+      --amber-500: #F59E0B;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--slate-950);
+      color: var(--slate-100);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* =========================================================================
+       TOP COMMAND HEADER
+       ========================================================================= */
+    header {
+      background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-900) 60%, var(--navy-800) 100%);
+      border-bottom: 3px solid var(--gold-500);
+      padding: 1rem 1.5rem;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .emblem {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--navy-950);
+      border: 2px solid var(--gold-400);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-400);
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .brand-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-400);
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #ffffff;
+    }
+
+    /* Base Network Pill */
+    .base-net-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: rgba(0, 13, 36, 0.75);
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius-md);
+    }
+
+    .base-net-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--slate-400);
+      font-weight: 700;
+    }
+
+    .base-net-value {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold-400);
+    }
+
+    /* Mode Switcher Tabs */
+    .mode-tabs {
+      display: flex;
+      background: var(--navy-950);
+      padding: 0.28rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--navy-700);
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-tab {
+      background: transparent;
+      border: none;
+      color: var(--slate-300);
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .mode-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .mode-tab.active {
+      background: var(--gold-500);
+      color: var(--navy-950);
+      box-shadow: 0 2px 8px rgba(197, 155, 39, 0.35);
+    }
+
+    /* =========================================================================
+       BUTTONS & GENERIC UTILITIES
+       ========================================================================= */
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-gold {
+      background: var(--gold-500);
+      color: var(--navy-950);
+      border-color: var(--gold-400);
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-400);
+    }
+
+    .btn-navy {
+      background: var(--navy-800);
+      color: #fff;
+      border-color: var(--navy-700);
+    }
+
+    .btn-navy:hover {
+      background: var(--navy-700);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--slate-300);
+      border-color: var(--slate-700);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--gold-400);
+      color: var(--gold-400);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: #FDA4AF;
+      border-color: rgba(244, 63, 94, 0.4);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.28);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 0.32rem 0.65rem;
+      font-size: 0.74rem;
+    }
+
+    /* =========================================================================
+       MAIN WORKSPACE CONTAINER
+       ========================================================================= */
+    main {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel {
+      background: var(--slate-900);
+      border: 1px solid var(--slate-800);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--slate-800);
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold-400);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* =========================================================================
+       MISSION BRIEFING / CHALLENGE CARD (MODES 2 & 3)
+       ========================================================================= */
+    .mission-panel {
+      background: linear-gradient(180deg, rgba(0, 32, 91, 0.45) 0%, var(--slate-900) 100%);
+      border: 1px solid rgba(197, 155, 39, 0.45);
+    }
+
+    .mission-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    select.tactical-select {
+      background: var(--navy-950);
+      color: var(--slate-100);
+      border: 1px solid var(--navy-700);
+      padding: 0.42rem 0.7rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .mission-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mission-brief-text {
+      font-size: 0.92rem;
+      color: var(--slate-300);
+      margin-bottom: 0.85rem;
+    }
+
+    .req-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .req-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background: var(--slate-850);
+      border: 1px solid var(--slate-700);
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+    }
+
+    .req-item.satisfied {
+      border-color: rgba(16, 185, 129, 0.55);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .req-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--navy-900);
+      color: var(--gold-400);
+      border: 1px solid var(--navy-700);
+    }
+
+    .req-item.satisfied .req-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald-400);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    /* Verification Feedback Banner */
+    .feedback-box {
+      background: var(--slate-950);
+      border: 1px solid var(--slate-700);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .feedback-box.success {
+      border-color: var(--emerald-500);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .feedback-box.error {
+      border-color: var(--rose-500);
+      background: rgba(244, 63, 94, 0.08);
+    }
+
+    .feedback-box.warn {
+      border-color: var(--amber-500);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    /* =========================================================================
+       SUBNET BLOCK PALETTE
+       ========================================================================= */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 1024px) {
+      .palette-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .palette-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .palette-block {
+      background: var(--slate-850);
+      border: 2px solid var(--slate-700);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      cursor: grab;
+      transition: all 0.16s ease;
+      position: relative;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .palette-block:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold-400);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .palette-block.selected-tool {
+      border-color: var(--gold-400);
+      background: rgba(212, 175, 55, 0.14);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.35);
+    }
+
+    .palette-block:active {
+      cursor: grabbing;
+    }
+
+    .pb-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pb-cidr {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .pb-pct {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--gold-400);
+    }
+
+    .pb-hosts {
+      font-size: 0.78rem;
+      color: var(--slate-300);
+      font-weight: 600;
+    }
+
+    .pb-mask {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--slate-400);
+    }
+
+    /* Color coding accents per CIDR prefix */
+    .cidr-accent-25 { border-left: 5px solid #3B82F6; }
+    .cidr-accent-26 { border-left: 5px solid #10B981; }
+    .cidr-accent-27 { border-left: 5px solid #D4AF37; }
+    .cidr-accent-28 { border-left: 5px solid #A855F7; }
+    .cidr-accent-29 { border-left: 5px solid #EC4899; }
+    .cidr-accent-30 { border-left: 5px solid #F97316; }
+
+    /* =========================================================================
+       BINARY BIT RULER (TOGGLEABLE)
+       ========================================================================= */
+    .bit-ruler-wrap {
+      background: var(--slate-950);
+      border: 1px solid var(--slate-800);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .bit-ruler-wrap.visible {
+      display: block;
+    }
+
+    .bit-ruler-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.78rem;
+      color: var(--slate-300);
+    }
+
+    .bit-cells {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.35rem;
+    }
+
+    .bit-cell {
+      background: var(--slate-900);
+      border: 1px solid var(--slate-700);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.25rem;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .bit-cell.borrowed {
+      background: rgba(212, 175, 55, 0.16);
+      border-color: var(--gold-500);
+    }
+
+    .bit-weight {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--gold-400);
+    }
+
+    .bit-cidr-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--slate-300);
+      margin-top: 0.15rem;
+    }
+
+    .bit-role {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate-400);
+      margin-top: 0.1rem;
+    }
+
+    /* =========================================================================
+       1D BINARY ADDRESS STRIP (256-IP PROPORTIONAL MEMORY BAR)
+       ========================================================================= */
+    .strip-wrapper {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .strip-canvas-container {
+      min-width: 760px;
+      position: relative;
+    }
+
+    /* Top Boundary Tick Ruler (.0, .32, .64, .96, .128, .160, .192, .224, .255) */
+    .strip-ticks {
+      position: relative;
+      height: 24px;
+      margin-bottom: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--slate-400);
+    }
+
+    .tick-mark {
+      position: absolute;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tick-mark::after {
+      content: "";
+      width: 1px;
+      height: 6px;
+      background: var(--slate-600);
+      margin-top: 2px;
+    }
+
+    .tick-mark.major {
+      color: var(--gold-400);
+      font-weight: 700;
+    }
+
+    .tick-mark.major::after {
+      background: var(--gold-500);
+      height: 8px;
+    }
+
+    /* The 256-unit Address Bar */
+    .address-strip {
+      position: relative;
+      height: 116px;
+      background: var(--slate-950);
+      border: 2px solid var(--navy-700);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Background 64-unit / 16-unit subtle grid lines */
+    .strip-grid-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(212, 175, 55, 0.22) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 25% 100%, 6.25% 100%;
+    }
+
+    /* Valid Aligned Snap Zone Indicators when dragging or tool-selected */
+    .snap-zones-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .snap-zone {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      border: 2px dashed rgba(212, 175, 55, 0.55);
+      background: rgba(212, 175, 55, 0.08);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold-300);
+      transition: all 0.12s ease;
+    }
+
+    .snap-zone.occupied {
+      border-color: rgba(148, 163, 184, 0.2);
+      background: transparent;
+      color: transparent;
+    }
+
+    .snap-zone.hovered-valid {
+      background: rgba(16, 185, 129, 0.28);
+      border: 2px solid var(--emerald-400);
+      color: #fff;
+      z-index: 8;
+    }
+
+    .snap-zone.hovered-invalid {
+      background: rgba(244, 63, 94, 0.28);
+      border: 2px solid var(--rose-500);
+      color: #FDA4AF;
+      z-index: 8;
+    }
+
+    /* Placed Subnet Blocks on the Strip */
+    .placed-blocks-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+    }
+
+    .placed-block {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      border-radius: 8px;
+      padding: 0.45rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .placed-block:hover {
+      transform: translateY(-2px);
+      z-index: 15;
+      border-color: #fff;
+    }
+
+    .placed-block.inspected {
+      border-color: var(--gold-400);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.45), 0 6px 16px rgba(0, 0, 0, 0.55);
+      z-index: 16;
+    }
+
+    .pb-fill-25 { background: linear-gradient(180deg, #1E40AF 0%, #172554 100%); }
+    .pb-fill-26 { background: linear-gradient(180deg, #047857 0%, #064E3B 100%); }
+    .pb-fill-27 { background: linear-gradient(180deg, #9E7714 0%, #5C4308 100%); }
+    .pb-fill-28 { background: linear-gradient(180deg, #6D28D9 0%, #3B0764 100%); }
+    .pb-fill-29 { background: linear-gradient(180deg, #BE185D 0%, #500724 100%); }
+    .pb-fill-30 { background: linear-gradient(180deg, #C2410C 0%, #431407 100%); }
+
+    .placed-block-cidr {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .placed-block-range {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .placed-block-hosts {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gold-300);
+      white-space: nowrap;
+    }
+
+    /* Strip Utilization Footer Bar */
+    .strip-stats-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--slate-800);
+      font-size: 0.8rem;
+      color: var(--slate-300);
+    }
+
+    /* =========================================================================
+       SUBNET INSPECTOR & TABLE BREAKDOWN
+       ========================================================================= */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 960px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+
+    .insp-field {
+      background: var(--slate-950);
+      border: 1px solid var(--slate-800);
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .insp-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--slate-400);
+    }
+
+    .insp-val {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 0.15rem;
+    }
+
+    .insp-val.gold {
+      color: var(--gold-400);
+    }
+
+    /* Routing / Allocation Table */
+    .alloc-table-wrap {
+      overflow-x: auto;
+    }
+
+    table.alloc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    table.alloc-table th {
+      text-align: left;
+      padding: 0.55rem 0.65rem;
+      background: var(--slate-950);
+      color: var(--gold-400);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--slate-700);
+    }
+
+    table.alloc-table td {
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--slate-800);
+      font-family: var(--font-mono);
+      color: var(--slate-200);
+    }
+
+    table.alloc-table tr {
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+
+    table.alloc-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    table.alloc-table tbody tr.active-row {
+      background: rgba(212, 175, 55, 0.12);
+    }
+
+    /* =========================================================================
+       EDUCATIONAL TOAST / ALIGNMENT ALERT BANNER
+       ========================================================================= */
+    .edu-alert {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      max-width: 440px;
+      background: var(--navy-950);
+      border: 2px solid var(--gold-500);
+      border-left-width: 6px;
+      color: #fff;
+      padding: 0.9rem 1.1rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+      z-index: 60;
+      display: none;
+      animation: slideUp 0.22s ease;
+    }
+
+    .edu-alert.error-alert {
+      border-color: var(--rose-500);
+    }
+
+    .edu-alert.visible {
+      display: block;
+    }
+
+    .edu-alert-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold-400);
+      margin-bottom: 0.25rem;
+    }
+
+    .edu-alert.error-alert .edu-alert-title {
+      color: #FDA4AF;
+    }
+
+    .edu-alert-body {
+      font-size: 0.84rem;
+      color: var(--slate-200);
+      line-height: 1.45;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(14px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--slate-400);
+      border-top: 1px solid var(--slate-800);
+      background: var(--navy-950);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================================= -->
+  <!-- TOP NAVIGATION & COMMAND HEADER                                         -->
+  <!-- ======================================================================= -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="emblem" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="6" rx="1"></rect>
+            <rect x="2" y="15" width="9" height="6" rx="1"></rect>
+            <rect x="13" y="15" width="9" height="6" rx="1"></rect>
+            <line x1="12" y1="9" x2="12" y2="12"></line>
+            <path d="M6.5 15v-3h11v3"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-tag">USN Information Warfare Training</div>
+          <div class="brand-title">SUBNET ARCHITECT // IPv4 VLSM TRAINER</div>
+        </div>
+      </div>
+
+      <!-- Base /24 Network Selector -->
+      <div class="base-net-controls">
+        <div>
+          <div class="base-net-label">Base /24 Block</div>
+          <div class="base-net-value" id="base-network-display">192.168.10.0/24</div>
+        </div>
+        <button class="btn btn-navy btn-sm" onclick="app.randomizeBaseNetwork()" title="Generate a new /24 base network">
+          New Base Network
+        </button>
+      </div>
+
+      <!-- Training Mode Switcher -->
+      <nav class="mode-tabs" role="tablist" aria-label="Training Modes">
+        <button class="mode-tab active" id="tab-sandbox" onclick="app.setMode('sandbox')">1. Free Sandbox</button>
+        <button class="mode-tab" id="tab-blueprints" onclick="app.setMode('blueprints')">2. CIDR Blueprints</button>
+        <button class="mode-tab" id="tab-scenarios" onclick="app.setMode('scenarios')">3. Operational Scenarios</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- MAIN WORKSPACE                                                          -->
+  <!-- ======================================================================= -->
+  <main>
+
+    <!-- MISSION BRIEFING PANEL (Visible in CIDR Blueprints & Operational Scenarios) -->
+    <section class="panel mission-panel" id="mission-panel" style="display: none;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span id="mission-mode-badge">MISSION BRIEFING</span>
+        </div>
+        <div class="mission-controls">
+          <label for="difficulty-select" style="font-size: 0.75rem; font-weight: 700; color: var(--slate-300);">Difficulty:</label>
+          <select id="difficulty-select" class="tactical-select" onchange="app.generateNewChallenge()">
+            <option value="easy">Easy (2–3 Subnets)</option>
+            <option value="medium" selected>Medium (3–4 Subnets)</option>
+            <option value="hard">Hard (4–6 Mixed VLSM)</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="app.generateNewChallenge()">New Mission</button>
+          <button class="btn btn-gold btn-sm" onclick="app.verifyChallenge()">Verify Allocation</button>
+        </div>
+      </div>
+
+      <div class="mission-grid">
+        <div>
+          <p class="mission-brief-text" id="mission-brief-text">
+            Allocate the requested subnet blocks onto the 256-IP address strip below.
+          </p>
+          <div class="req-list" id="mission-req-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="feedback-box" id="mission-feedback-box">
+          <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold-400);" id="feedback-title">
+            Allocation Readiness Status
+          </div>
+          <div style="font-size: 0.84rem; color: var(--slate-300);" id="feedback-body">
+            Drag subnet blocks from the palette onto valid aligned slots on the address bar, then click <strong>Verify Allocation</strong> to grade your layout.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUBNET BLOCK PALETTE -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Subnet Block Palette</span>
+          <span style="font-size: 0.72rem; font-weight: 600; text-transform: none; letter-spacing: normal; color: var(--slate-400);">
+            (Drag onto strip OR click a block to select &amp; click any highlighted slot)
+          </span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-outline btn-sm" id="btn-toggle-ruler" onclick="app.toggleBitRuler()">
+            Show Binary Bit Ruler
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="app.clearStrip()">
+            Clear Strip
+          </button>
+        </div>
+      </div>
+
+      <div class="palette-grid" id="palette-grid">
+        <!-- Populated by JS (/25 through /30) -->
+      </div>
+    </section>
+
+    <!-- 1D BINARY ADDRESS STRIP (256-IP MEMORY BAR) -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>256-IP Binary Address Strip (.0 – .255)</span>
+        </div>
+        <div style="font-size: 0.76rem; color: var(--slate-300);">
+          Selected Tool: <strong id="selected-tool-label" style="color: var(--gold-400); font-family: var(--font-mono);">None (Click a block above or drag directly)</strong>
+        </div>
+      </div>
+
+      <!-- Toggleable 8-Bit Host Ruler -->
+      <div class="bit-ruler-wrap" id="bit-ruler-wrap">
+        <div class="bit-ruler-header">
+          <span><strong>Host Octet Bit Weights (8 Bits = 256 Addresses):</strong> Borrowing leftmost host bits halves block size and sets legal CIDR start boundaries.</span>
+          <span style="font-family: var(--font-mono); color: var(--gold-400);">Block Size = 2^(32 - CIDR)</span>
+        </div>
+        <div class="bit-cells" id="bit-cells-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Horizontal Scroll Wrapper for Mobile Safety -->
+      <div class="strip-wrapper">
+        <div class="strip-canvas-container">
+          <!-- Top Boundary Ticks -->
+          <div class="strip-ticks" id="strip-ticks">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Interactive 256-IP Address Bar -->
+          <div class="address-strip" id="address-strip">
+            <div class="strip-grid-overlay"></div>
+            <div class="snap-zones-layer" id="snap-zones-layer"></div>
+            <div class="placed-blocks-layer" id="placed-blocks-layer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strip Utilization Metrics -->
+      <div class="strip-stats-bar">
+        <div>
+          Allocated Space: <strong id="stat-allocated-ips" style="color: #fff; font-family: var(--font-mono);">0 / 256 IPs (0%)</strong>
+          &nbsp;|&nbsp;
+          Unallocated Free Space: <strong id="stat-free-ips" style="color: var(--gold-400); font-family: var(--font-mono);">256 IPs</strong>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--slate-400);">
+          Tip: Click any placed block to inspect details, split in half, or remove.
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM PANEL: SUBNET INSPECTOR & ALLOCATION TABLE -->
+    <section class="bottom-grid">
+      <!-- Selected Subnet Inspector -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Subnet Inspector</div>
+          <div id="inspector-actions" style="display: none; gap: 0.45rem;">
+            <button class="btn btn-navy btn-sm" id="btn-split-block" onclick="app.splitInspectedBlock()" title="Subdivide this subnet into two equal halves">
+              Split in Half
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="app.removeInspectedBlock()">
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <div id="inspector-empty" style="padding: 1.5rem 0.5rem; text-align: center; color: var(--slate-400); font-size: 0.85rem;">
+          Click any placed subnet block on the address strip above to inspect its Network ID, Usable Host Range, Broadcast Address, and Subnet/Wildcard Masks.
+        </div>
+
+        <div class="inspector-grid" id="inspector-details" style="display: none;">
+          <div class="insp-field">
+            <div class="insp-label">Network ID / CIDR</div>
+            <div class="insp-val gold" id="insp-network">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Subnet Mask</div>
+            <div class="insp-val" id="insp-mask">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">First Usable Host</div>
+            <div class="insp-val" id="insp-first-host">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Last Usable Host</div>
+            <div class="insp-val" id="insp-last-host">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Broadcast Address</div>
+            <div class="insp-val" id="insp-broadcast">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Wildcard Mask</div>
+            <div class="insp-val" id="insp-wildcard">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Total Block Size</div>
+            <div class="insp-val" id="insp-total-size">-</div>
+          </div>
+          <div class="insp-field">
+            <div class="insp-label">Usable Host IPs (2ⁿ - 2)</div>
+            <div class="insp-val gold" id="insp-usable-hosts">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Subnet Allocation Table -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Allocated Subnet Table</div>
+          <span style="font-size: 0.74rem; color: var(--slate-400);" id="table-count-label">0 Subnets</span>
+        </div>
+
+        <div class="alloc-table-wrap">
+          <table class="alloc-table">
+            <thead>
+              <tr>
+                <th>Network ID</th>
+                <th>Usable Host Range</th>
+                <th>Broadcast</th>
+                <th>Usable</th>
+              </tr>
+            </thead>
+            <tbody id="alloc-table-body">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--slate-400); font-family: var(--font-sans); padding: 1.5rem;">
+                  No subnets allocated yet. Drag a block onto the strip to begin.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- EDUCATIONAL FEEDBACK TOAST -->
+  <div class="edu-alert" id="edu-alert" role="status" aria-live="polite">
+    <div class="edu-alert-title" id="edu-alert-title">Binary Alignment Notice</div>
+    <div class="edu-alert-body" id="edu-alert-body">Explanation text</div>
+  </div>
+
+  <footer>
+    USN Tactical Network Training &bull; Interactive IPv4 Subnetting &amp; VLSM Visualizer &bull; Zero-Dependency GitHub Pages Edition
+  </footer>
+
+  <!-- ======================================================================= -->
+  <!-- APPLICATION LOGIC (VANILLA ES6+)                                        -->
+  <!-- ======================================================================= -->
+  <script>
+    /**
+     * Subnet specifications from /25 down to /30 within a /24 parent space (256 IPs).
+     */
+    const SUBNET_SPECS = [
+      { prefix: 25, size: 128, usable: 126, mask: "255.255.255.128", wildcard: "0.0.0.127", pct: "50%" },
+      { prefix: 26, size: 64,  usable: 62,  mask: "255.255.255.192", wildcard: "0.0.0.63",  pct: "25%" },
+      { prefix: 27, size: 32,  usable: 30,  mask: "255.255.255.224", wildcard: "0.0.0.31",  pct: "12.5%" },
+      { prefix: 28, size: 16,  usable: 14,  mask: "255.255.255.240", wildcard: "0.0.0.15",  pct: "6.25%" },
+      { prefix: 29, size: 8,   usable: 6,   mask: "255.255.255.248", wildcard: "0.0.0.7",   pct: "3.13%" },
+      { prefix: 30, size: 4,   usable: 2,   mask: "255.255.255.252", wildcard: "0.0.0.3",   pct: "1.56%" }
+    ];
+
+    const NAVY_ENCLAVES = [
+      "Command Post LAN",
+      "Watch Floor Consoles",
+      "Tactical VoIP Enclave",
+      "Combat Systems Servers",
+      "SATCOM Management VLAN",
+      "Wireless Access Controllers",
+      "Point-to-Point Router Uplink",
+      "Sensor Telemetry Subnet",
+      "Engineering Diagnostics",
+      "Admin Workstation Pool"
+    ];
+
+    const app = {
+      state: {
+        baseOctets: [192, 168, 10], // Represents 192.168.10.0/24
+        mode: "sandbox",            // 'sandbox' | 'blueprints' | 'scenarios'
+        placedBlocks: [],           // Array of { id, start, prefix }
+        selectedToolPrefix: null,   // Prefix selected via click-to-place or active drag
+        draggedPrefix: null,        // Prefix currently being dragged via HTML5 DnD
+        inspectedBlockId: null,     // ID of block currently selected on strip
+        bitRulerVisible: false,
+        challenge: null             // Current challenge object for modes 2 & 3
+      },
+
+      init() {
+        this.renderPalette();
+        this.renderBitRuler();
+        this.renderStripTicks();
+        this.bindStripInteractions();
+        this.renderAll();
+      },
+
+      /* =====================================================================
+         BASE NETWORK & MODE MANAGEMENT
+         ===================================================================== */
+      getBasePrefixStr() {
+        return this.state.baseOctets.join(".");
+      },
+
+      randomizeBaseNetwork() {
+        const templates = [
+          () => [192, 168, Math.floor(Math.random() * 250) + 1],
+          () => [10, Math.floor(Math.random() * 255), Math.floor(Math.random() * 255)],
+          () => [172, Math.floor(Math.random() * 16) + 16, Math.floor(Math.random() * 255)]
+        ];
+        const picker = templates[Math.floor(Math.random() * templates.length)];
+        this.state.baseOctets = picker();
+        document.getElementById("base-network-display").textContent = `${this.getBasePrefixStr()}.0/24`;
+        this.renderAll();
+        this.showAlert("Base Network Updated", `Switched active /24 training space to ${this.getBasePrefixStr()}.0/24.`, false);
+      },
+
+      setMode(newMode) {
+        this.state.mode = newMode;
+        ["sandbox", "blueprints", "scenarios"].forEach(m => {
+          document.getElementById(`tab-${m}`).classList.toggle("active", m === newMode);
+        });
+
+        const missionPanel = document.getElementById("mission-panel");
+        if (newMode === "sandbox") {
+          missionPanel.style.display = "none";
+          this.state.challenge = null;
+        } else {
+          missionPanel.style.display = "block";
+          this.clearStrip(true);
+          this.generateNewChallenge();
+        }
+      },
+
+      /* =====================================================================
+         PALETTE & BIT RULER RENDERING
+         ===================================================================== */
+      renderPalette() {
+        const grid = document.getElementById("palette-grid");
+        grid.innerHTML = "";
+
+        SUBNET_SPECS.forEach(spec => {
+          const el = document.createElement("div");
+          el.className = `palette-block cidr-accent-${spec.prefix}`;
+          el.id = `palette-block-${spec.prefix}`;
+          el.draggable = true;
+
+          el.innerHTML = `
+            <div class="pb-top">
+              <span class="pb-cidr">/${spec.prefix}</span>
+              <span class="pb-pct">${spec.pct} (${spec.size} IPs)</span>
+            </div>
+            <div class="pb-hosts">${spec.usable} Usable Hosts</div>
+            <div class="pb-mask">${spec.mask}</div>
+          `;
+
+          // Click-to-select tool fallback (for touchscreens & fast clicking)
+          el.addEventListener("click", () => {
+            if (this.state.selectedToolPrefix === spec.prefix) {
+              this.selectTool(null);
+            } else {
+              this.selectTool(spec.prefix);
+            }
+          });
+
+          // HTML5 Drag start
+          el.addEventListener("dragstart", (e) => {
+            this.state.draggedPrefix = spec.prefix;
+            this.selectTool(spec.prefix);
+            if (e.dataTransfer) {
+              e.dataTransfer.setData("text/plain", String(spec.prefix));
+              e.dataTransfer.effectAllowed = "copy";
+            }
+          });
+
+          el.addEventListener("dragend", () => {
+            this.state.draggedPrefix = null;
+            this.clearSnapHover();
+          });
+
+          grid.appendChild(el);
+        });
+      },
+
+      selectTool(prefix) {
+        this.state.selectedToolPrefix = prefix;
+        SUBNET_SPECS.forEach(s => {
+          const el = document.getElementById(`palette-block-${s.prefix}`);
+          if (el) el.classList.toggle("selected-tool", s.prefix === prefix);
+        });
+
+        const label = document.getElementById("selected-tool-label");
+        if (prefix) {
+          const spec = this.getSpec(prefix);
+          label.textContent = `/${prefix} (${spec.size} total / ${spec.usable} usable) — Click any highlighted slot below`;
+        } else {
+          label.textContent = "None (Click a block above or drag directly)";
+        }
+
+        this.renderSnapZones();
+      },
+
+      toggleBitRuler() {
+        this.state.bitRulerVisible = !this.state.bitRulerVisible;
+        const wrap = document.getElementById("bit-ruler-wrap");
+        const btn = document.getElementById("btn-toggle-ruler");
+        wrap.classList.toggle("visible", this.state.bitRulerVisible);
+        btn.textContent = this.state.bitRulerVisible ? "Hide Binary Bit Ruler" : "Show Binary Bit Ruler";
+      },
+
+      renderBitRuler() {
+        const container = document.getElementById("bit-cells-container");
+        const bits = [
+          { weight: 128, cidr: "/25", role: "1st Borrowed" },
+          { weight: 64,  cidr: "/26", role: "2nd Borrowed" },
+          { weight: 32,  cidr: "/27", role: "3rd Borrowed" },
+          { weight: 16,  cidr: "/28", role: "4th Borrowed" },
+          { weight: 8,   cidr: "/29", role: "5th Borrowed" },
+          { weight: 4,   cidr: "/30", role: "6th Borrowed" },
+          { weight: 2,   cidr: "/31", role: "Host Bit" },
+          { weight: 1,   cidr: "/32", role: "Host Bit" }
+        ];
+
+        container.innerHTML = bits.map(b => `
+          <div class="bit-cell ${b.weight >= 4 ? "borrowed" : ""}">
+            <div class="bit-weight">${b.weight}</div>
+            <div class="bit-cidr-tag">${b.cidr} Block</div>
+            <div class="bit-role">${b.role}</div>
+          </div>
+        `).join("");
+      },
+
+      renderStripTicks() {
+        const ticksEl = document.getElementById("strip-ticks");
+        const points = [0, 32, 64, 96, 128, 160, 192, 224, 255];
+        ticksEl.innerHTML = points.map(pt => {
+          const pct = (pt / 256) * 100;
+          const isMajor = pt % 64 === 0 || pt === 255;
+          return `<div class="tick-mark ${isMajor ? "major" : ""}" style="left: ${pct}%;">.${pt}</div>`;
+        }).join("");
+      },
+
+      /* =====================================================================
+         256-IP STRIP DRAG-AND-DROP & CLICK PLACEMENT MECHANICS
+         ===================================================================== */
+      bindStripInteractions() {
+        const strip = document.getElementById("address-strip");
+
+        // Handle HTML5 DragOver
+        strip.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          const prefix = this.state.draggedPrefix || this.state.selectedToolPrefix;
+          if (!prefix) return;
+
+          const rawOffset = this.getPointerOctetOffset(e, strip);
+          this.previewPlacement(prefix, rawOffset);
+        });
+
+        strip.addEventListener("dragleave", (e) => {
+          if (!strip.contains(e.relatedTarget)) {
+            this.clearSnapHover();
+          }
+        });
+
+        // Handle HTML5 Drop
+        strip.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const prefix = this.state.draggedPrefix || Number(e.dataTransfer?.getData("text/plain")) || this.state.selectedToolPrefix;
+          this.clearSnapHover();
+          if (!prefix) return;
+
+          const rawOffset = this.getPointerOctetOffset(e, strip);
+          this.attemptPlaceBlock(prefix, rawOffset);
+        });
+
+        // Handle Click-to-Place when a palette block is selected
+        strip.addEventListener("click", (e) => {
+          // Ignore if clicking directly on an existing placed block
+          if (e.target.closest(".placed-block")) return;
+          if (!this.state.selectedToolPrefix) return;
+
+          const rawOffset = this.getPointerOctetOffset(e, strip);
+          this.attemptPlaceBlock(this.state.selectedToolPrefix, rawOffset);
+        });
+      },
+
+      getPointerOctetOffset(e, stripEl) {
+        const rect = stripEl.getBoundingClientRect();
+        const relX = Math.max(0, Math.min(rect.width - 1, e.clientX - rect.left));
+        return Math.floor((relX / rect.width) * 256);
+      },
+
+      previewPlacement(prefix, rawOffset) {
+        const spec = this.getSpec(prefix);
+        const alignedStart = Math.floor(rawOffset / spec.size) * spec.size;
+        const isFree = this.isRangeFree(alignedStart, spec.size);
+
+        this.clearSnapHover();
+        const zone = document.getElementById(`snap-zone-${alignedStart}`);
+        if (zone) {
+          zone.classList.add(isFree ? "hovered-valid" : "hovered-invalid");
+        }
+      },
+
+      clearSnapHover() {
+        document.querySelectorAll(".snap-zone").forEach(z => {
+          z.classList.remove("hovered-valid", "hovered-invalid");
+        });
+      },
+
+      /**
+       * Core CIDR Binary Boundary & Overlap Validation
+       */
+      attemptPlaceBlock(prefix, rawOffset) {
+        const spec = this.getSpec(prefix);
+        if (!spec) return;
+
+        // Calculate legal binary-aligned start boundary
+        const alignedStart = Math.floor(rawOffset / spec.size) * spec.size;
+
+        // Check if aligned slot is already occupied
+        if (!this.isRangeFree(alignedStart, spec.size)) {
+          const validStarts = [];
+          for (let s = 0; s < 256; s += spec.size) validStarts.push(`.${s}`);
+          this.showAlert(
+            "Address Space Collision / Boundary Block",
+            `A /${prefix} block requires ${spec.size} contiguous aligned addresses (valid boundaries: ${validStarts.slice(0, 6).join(", ")}${validStarts.length > 6 ? "..." : ""}). The .${alignedStart}–.${alignedStart + spec.size - 1} boundary overlaps an existing subnet.`,
+            true
+          );
+          return;
+        }
+
+        // If user clicked noticeably far from the aligned start, educate them while snapping cleanly
+        if (Math.abs(rawOffset - alignedStart) >= Math.max(8, spec.size * 0.35)) {
+          this.showAlert(
+            `Snapped to Binary Boundary (.${alignedStart})`,
+            `In IPv4 binary math, a /${prefix} (${spec.size} IPs) must start on a multiple of ${spec.size}. Your block was aligned to .${alignedStart}–.${alignedStart + spec.size - 1}.`,
+            false
+          );
+        }
+
+        const newBlock = {
+          id: "blk-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+          start: alignedStart,
+          prefix: prefix
+        };
+
+        this.state.placedBlocks.push(newBlock);
+        this.state.placedBlocks.sort((a, b) => a.start - b.start);
+        this.state.inspectedBlockId = newBlock.id;
+
+        this.renderAll();
+      },
+
+      isRangeFree(start, size) {
+        const end = start + size - 1;
+        if (start < 0 || end > 255) return false;
+        return !this.state.placedBlocks.some(b => {
+          const bSpec = this.getSpec(b.prefix);
+          const bEnd = b.start + bSpec.size - 1;
+          return start <= bEnd && end >= b.start;
+        });
+      },
+
+      /* =====================================================================
+         SUBNET SUBDIVISION ("SPLIT IN HALF") & REMOVAL
+         ===================================================================== */
+      splitInspectedBlock() {
+        const idx = this.state.placedBlocks.findIndex(b => b.id === this.state.inspectedBlockId);
+        if (idx === -1) return;
+
+        const block = this.state.placedBlocks[idx];
+        if (block.prefix >= 30) {
+          this.showAlert("Minimum Subnet Size Reached", "A /30 (4 total / 2 usable hosts) is the smallest practical point-to-point subnet in this trainer.", true);
+          return;
+        }
+
+        const newPrefix = block.prefix + 1;
+        const halfSize = this.getSpec(newPrefix).size;
+
+        const firstHalf = {
+          id: "blk-" + Date.now() + "-a",
+          start: block.start,
+          prefix: newPrefix
+        };
+        const secondHalf = {
+          id: "blk-" + Date.now() + "-b",
+          start: block.start + halfSize,
+          prefix: newPrefix
+        };
+
+        this.state.placedBlocks.splice(idx, 1, firstHalf, secondHalf);
+        this.state.inspectedBlockId = firstHalf.id;
+        this.renderAll();
+
+        this.showAlert(
+          `Subdivided /${block.prefix} into Two /${newPrefix} Subnets`,
+          `Borrowing 1 host bit divided .${block.start}/${block.prefix} into .${firstHalf.start}/${newPrefix} and .${secondHalf.start}/${newPrefix} (${halfSize} IPs each).`,
+          false
+        );
+      },
+
+      removeInspectedBlock() {
+        if (!this.state.inspectedBlockId) return;
+        this.state.placedBlocks = this.state.placedBlocks.filter(b => b.id !== this.state.inspectedBlockId);
+        this.state.inspectedBlockId = null;
+        this.renderAll();
+      },
+
+      clearStrip(silent = false) {
+        this.state.placedBlocks = [];
+        this.state.inspectedBlockId = null;
+        this.renderAll();
+        if (!silent) {
+          this.showAlert("Address Strip Cleared", "All 256 host addresses (.0 – .255) are now unallocated.", false);
+        }
+      },
+
+      /* =====================================================================
+         RENDERING STRIP, SNAP ZONES, INSPECTOR, AND TABLE
+         ===================================================================== */
+      renderAll() {
+        this.renderSnapZones();
+        this.renderPlacedBlocks();
+        this.renderStats();
+        this.renderInspector();
+        this.renderTable();
+        this.updateMissionChecklistLive();
+      },
+
+      renderSnapZones() {
+        const layer = document.getElementById("snap-zones-layer");
+        layer.innerHTML = "";
+
+        const activePrefix = this.state.draggedPrefix || this.state.selectedToolPrefix;
+        if (!activePrefix) return;
+
+        const spec = this.getSpec(activePrefix);
+        for (let start = 0; start < 256; start += spec.size) {
+          const free = this.isRangeFree(start, spec.size);
+          const zone = document.createElement("div");
+          zone.id = `snap-zone-${start}`;
+          zone.className = `snap-zone ${free ? "" : "occupied"}`;
+          zone.style.left = `${(start / 256) * 100}%`;
+          zone.style.width = `${(spec.size / 256) * 100}%`;
+          if (free && spec.size >= 16) {
+            zone.textContent = `.${start}/${activePrefix}`;
+          }
+          layer.appendChild(zone);
+        }
+      },
+
+      renderPlacedBlocks() {
+        const layer = document.getElementById("placed-blocks-layer");
+        layer.innerHTML = "";
+
+        this.state.placedBlocks.forEach(block => {
+          const spec = this.getSpec(block.prefix);
+          const endOctet = block.start + spec.size - 1;
+          const leftPct = (block.start / 256) * 100;
+          const widthPct = (spec.size / 256) * 100;
+
+          const el = document.createElement("div");
+          el.className = `placed-block pb-fill-${block.prefix} ${this.state.inspectedBlockId === block.id ? "inspected" : ""}`;
+          el.style.left = `calc(${leftPct}% + 2px)`;
+          el.style.width = `calc(${widthPct}% - 4px)`;
+          el.title = `.${block.start}/${block.prefix} (.${block.start} – .${endOctet}) | ${spec.usable} usable hosts`;
+
+          // Compact display for narrow blocks (/29, /30)
+          if (spec.size <= 8) {
+            el.innerHTML = `
+              <div class="placed-block-cidr" style="font-size: 0.72rem; text-align:center;">/${block.prefix}</div>
+              <div class="placed-block-range" style="font-size: 0.6rem; text-align:center;">.${block.start}</div>
+            `;
+          } else if (spec.size === 16) {
+            el.innerHTML = `
+              <div class="placed-block-cidr" style="font-size: 0.82rem;">/${block.prefix}</div>
+              <div class="placed-block-range">.${block.start}–.${endOctet}</div>
+              <div class="placed-block-hosts">${spec.usable}h</div>
+            `;
+          } else {
+            el.innerHTML = `
+              <div class="placed-block-cidr">.${block.start}/${block.prefix}</div>
+              <div class="placed-block-range">Range: .${block.start} – .${endOctet}</div>
+              <div class="placed-block-hosts">${spec.usable} Usable Hosts</div>
+            `;
+          }
+
+          el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.state.inspectedBlockId = block.id;
+            this.renderAll();
+          });
+
+          // Right-click quick delete
+          el.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            this.state.placedBlocks = this.state.placedBlocks.filter(b => b.id !== block.id);
+            if (this.state.inspectedBlockId === block.id) this.state.inspectedBlockId = null;
+            this.renderAll();
+          });
+
+          layer.appendChild(el);
+        });
+      },
+
+      renderStats() {
+        const allocated = this.state.placedBlocks.reduce((sum, b) => sum + this.getSpec(b.prefix).size, 0);
+        const free = 256 - allocated;
+        const pct = Math.round((allocated / 256) * 100);
+
+        document.getElementById("stat-allocated-ips").textContent = `${allocated} / 256 IPs (${pct}%)`;
+        document.getElementById("stat-free-ips").textContent = `${free} IPs`;
+      },
+
+      renderInspector() {
+        const emptyEl = document.getElementById("inspector-empty");
+        const detailsEl = document.getElementById("inspector-details");
+        const actionsEl = document.getElementById("inspector-actions");
+
+        const block = this.state.placedBlocks.find(b => b.id === this.state.inspectedBlockId);
+        if (!block) {
+          emptyEl.style.display = "block";
+          detailsEl.style.display = "none";
+          actionsEl.style.display = "none";
+          return;
+        }
+
+        emptyEl.style.display = "none";
+        detailsEl.style.display = "grid";
+        actionsEl.style.display = "flex";
+
+        const spec = this.getSpec(block.prefix);
+        const base = this.getBasePrefixStr();
+        const endOctet = block.start + spec.size - 1;
+
+        document.getElementById("insp-network").textContent = `${base}.${block.start}/${block.prefix}`;
+        document.getElementById("insp-mask").textContent = spec.mask;
+        document.getElementById("insp-first-host").textContent = `${base}.${block.start + 1}`;
+        document.getElementById("insp-last-host").textContent = `${base}.${endOctet - 1}`;
+        document.getElementById("insp-broadcast").textContent = `${base}.${endOctet}`;
+        document.getElementById("insp-wildcard").textContent = spec.wildcard;
+        document.getElementById("insp-total-size").textContent = `${spec.size} Addresses`;
+        document.getElementById("insp-usable-hosts").textContent = `${spec.usable} Hosts`;
+
+        document.getElementById("btn-split-block").disabled = block.prefix >= 30;
+      },
+
+      renderTable() {
+        const tbody = document.getElementById("alloc-table-body");
+        const countLabel = document.getElementById("table-count-label");
+        countLabel.textContent = `${this.state.placedBlocks.length} Subnet${this.state.placedBlocks.length === 1 ? "" : "s"}`;
+
+        if (this.state.placedBlocks.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--slate-400); font-family: var(--font-sans); padding: 1.5rem;">
+                No subnets allocated yet. Drag a block onto the strip to begin.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        const base = this.getBasePrefixStr();
+        tbody.innerHTML = this.state.placedBlocks.map(b => {
+          const spec = this.getSpec(b.prefix);
+          const endOctet = b.start + spec.size - 1;
+          const isSelected = b.id === this.state.inspectedBlockId;
+          return `
+            <tr class="${isSelected ? "active-row" : ""}" onclick="app.inspectBlockById('${b.id}')">
+              <td style="color: var(--gold-400); font-weight: 700;">${base}.${b.start}/${b.prefix}</td>
+              <td>.${b.start + 1} – .${endOctet - 1}</td>
+              <td>.${endOctet}</td>
+              <td>${spec.usable}</td>
+            </tr>
+          `;
+        }).join("");
+      },
+
+      inspectBlockById(id) {
+        this.state.inspectedBlockId = id;
+        this.renderAll();
+      },
+
+      /* =====================================================================
+         PROCEDURAL CHALLENGE GENERATOR & SMART VLSM GRADER (MODES 2 & 3)
+         ===================================================================== */
+      generateNewChallenge() {
+        const diff = document.getElementById("difficulty-select").value;
+        const targetCount = diff === "easy" ? 2 : diff === "medium" ? 3 : 5;
+
+        // Generate valid non-exceeding combinations of subnet sizes that fit in 256 IPs
+        const availableSizes = [128, 64, 32, 16, 8, 4];
+        let remaining = 256;
+        const chosenPrefixes = [];
+
+        for (let i = 0; i < targetCount; i++) {
+          // Reserve space for remaining items (at least 4 IPs each)
+          const minReserve = (targetCount - 1 - i) * 4;
+          const maxAllowed = remaining - minReserve;
+          const validSizes = availableSizes.filter(sz => sz <= maxAllowed && (diff !== "easy" || sz >= 32));
+          if (validSizes.length === 0) break;
+
+          const pickedSize = validSizes[Math.floor(Math.random() * validSizes.length)];
+          const spec = SUBNET_SPECS.find(s => s.size === pickedSize);
+          chosenPrefixes.push(spec.prefix);
+          remaining -= pickedSize;
+        }
+
+        // Sort largest first (VLSM best practice)
+        chosenPrefixes.sort((a, b) => a - b);
+
+        if (this.state.mode === "blueprints") {
+          // Group identical CIDR prefixes (e.g., 1x /25, 2x /27)
+          const counts = {};
+          chosenPrefixes.forEach(p => { counts[p] = (counts[p] || 0) + 1; });
+
+          const requirements = Object.entries(counts)
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .map(([prefix, count]) => ({
+              prefix: Number(prefix),
+              count: count
+            }));
+
+          this.state.challenge = {
+            type: "blueprints",
+            requirements
+          };
+
+          document.getElementById("mission-mode-badge").textContent = "MODE 2 // CIDR BLUEPRINT SPECIFICATION";
+          document.getElementById("mission-brief-text").textContent =
+            "Build the exact CIDR block allocation listed below on the 256-IP strip. Any remaining address space may stay unallocated.";
+        } else {
+          // Operational Scenario: Generate realistic host count requirements
+          const shuffledNames = [...NAVY_ENCLAVES].sort(() => Math.random() - 0.5);
+          const scenarios = chosenPrefixes.map((optimalPrefix, idx) => {
+            const optSpec = this.getSpec(optimalPrefix);
+            const prevSpec = this.getSpec(optimalPrefix + 1);
+            const minHosts = prevSpec ? prevSpec.usable + 1 : 2;
+            const maxHosts = optSpec.usable;
+            const requiredHosts = Math.floor(Math.random() * (maxHosts - minHosts + 1)) + minHosts;
+
+            return {
+              label: shuffledNames[idx % shuffledNames.length],
+              requiredHosts,
+              optimalPrefix
+            };
+          });
+
+          this.state.challenge = {
+            type: "scenarios",
+            scenarios
+          };
+
+          document.getElementById("mission-mode-badge").textContent = "MODE 3 // OPERATIONAL VLSM MISSION BRIEF";
+          document.getElementById("mission-brief-text").textContent =
+            "Afloat Network Architecture Request: Allocate non-overlapping subnets satisfying every enclave's usable host count below. Remaining address space may remain blank.";
+        }
+
+        this.resetFeedbackBox();
+        this.updateMissionChecklistLive();
+      },
+
+      updateMissionChecklistLive() {
+        const listEl = document.getElementById("mission-req-list");
+        if (!this.state.challenge) return;
+
+        if (this.state.challenge.type === "blueprints") {
+          listEl.innerHTML = this.state.challenge.requirements.map(req => {
+            const placedCount = this.state.placedBlocks.filter(b => b.prefix === req.prefix).length;
+            const isDone = placedCount === req.count;
+            const spec = this.getSpec(req.prefix);
+            return `
+              <div class="req-item ${isDone ? "satisfied" : ""}">
+                <div>
+                  <strong>${req.count}&times; /${req.prefix} Subnet${req.count > 1 ? "s" : ""}</strong>
+                  <span style="color: var(--slate-400); font-size: 0.78rem; margin-left: 0.4rem;">(${spec.size} IPs each / ${spec.usable} usable)</span>
+                </div>
+                <span class="req-badge">${placedCount} / ${req.count} Placed</span>
+              </div>
+            `;
+          }).join("");
+        } else {
+          // Match placed blocks greedily to scenarios to preview live satisfaction
+          const pool = [...this.state.placedBlocks].sort((a, b) => b.prefix - a.prefix); // smallest capacity first
+          const sortedScenarios = [...this.state.challenge.scenarios].sort((a, b) => a.requiredHosts - b.requiredHosts);
+          const matchedMap = new Map();
+
+          sortedScenarios.forEach((sc, idx) => {
+            const matchIdx = pool.findIndex(b => this.getSpec(b.prefix).usable >= sc.requiredHosts);
+            if (matchIdx !== -1) {
+              matchedMap.set(sc, pool[matchIdx]);
+              pool.splice(matchIdx, 1);
+            }
+          });
+
+          listEl.innerHTML = this.state.challenge.scenarios.map(sc => {
+            const matchedBlock = matchedMap.get(sc);
+            return `
+              <div class="req-item ${matchedBlock ? "satisfied" : ""}">
+                <div>
+                  <strong>${sc.label}:</strong>
+                  <span style="color: var(--gold-300); font-weight: 700;">${sc.requiredHosts} usable host IPs</span>
+                </div>
+                <span class="req-badge">
+                  ${matchedBlock ? `Matched: .${matchedBlock.start}/${matchedBlock.prefix} (${this.getSpec(matchedBlock.prefix).usable}h)` : "Unassigned"}
+                </span>
+              </div>
+            `;
+          }).join("");
+        }
+      },
+
+      verifyChallenge() {
+        if (!this.state.challenge) return;
+        const box = document.getElementById("mission-feedback-box");
+        const titleEl = document.getElementById("feedback-title");
+        const bodyEl = document.getElementById("feedback-body");
+
+        box.className = "feedback-box";
+
+        if (this.state.challenge.type === "blueprints") {
+          const issues = [];
+          const allowedPrefixes = new Set(this.state.challenge.requirements.map(r => r.prefix));
+
+          this.state.challenge.requirements.forEach(req => {
+            const actual = this.state.placedBlocks.filter(b => b.prefix === req.prefix).length;
+            if (actual < req.count) {
+              issues.push(`Missing ${req.count - actual}× /${req.prefix} subnet(s).`);
+            } else if (actual > req.count) {
+              issues.push(`Too many /${req.prefix} subnets placed (${actual} placed, ${req.count} requested).`);
+            }
+          });
+
+          this.state.placedBlocks.forEach(b => {
+            if (!allowedPrefixes.has(b.prefix)) {
+              issues.push(`Unrequested /${b.prefix} block placed at .${b.start}.`);
+            }
+          });
+
+          if (issues.length === 0) {
+            box.classList.add("success");
+            titleEl.style.color = "var(--emerald-400)";
+            titleEl.textContent = "MISSION ACCOMPLISHED // EXACT BLUEPRINT MATCH";
+            bodyEl.innerHTML = `All required CIDR subnets are properly aligned on binary boundaries with zero address overlap. Click <strong>New Mission</strong> to drill another topology.`;
+          } else {
+            box.classList.add("error");
+            titleEl.style.color = "#FDA4AF";
+            titleEl.textContent = "ALLOCATION INCOMPLETE";
+            bodyEl.innerHTML = `<ul style="margin-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem;">${issues.map(i => `<li>${i}</li>`).join("")}</ul>`;
+          }
+        } else {
+          // Operational VLSM Scenario Grading
+          const scenarios = [...this.state.challenge.scenarios].sort((a, b) => b.requiredHosts - a.requiredHosts);
+          const availableBlocks = [...this.state.placedBlocks].sort((a, b) => a.prefix - b.prefix); // largest first
+
+          if (availableBlocks.length < scenarios.length) {
+            box.classList.add("error");
+            titleEl.style.color = "#FDA4AF";
+            titleEl.textContent = "INSUFFICIENT SUBNETS ALLOCATED";
+            bodyEl.textContent = `Mission requires ${scenarios.length} separate subnets, but only ${availableBlocks.length} subnet block(s) are currently placed on the strip.`;
+            return;
+          }
+
+          // Match smallest sufficient block to each scenario (ascending host order)
+          const ascScenarios = [...scenarios].sort((a, b) => a.requiredHosts - b.requiredHosts);
+          const ascBlocks = [...this.state.placedBlocks].sort((a, b) => b.prefix - a.prefix); // smallest capacity first
+          const unsatisfied = [];
+          let wastedBlocks = 0;
+
+          ascScenarios.forEach(sc => {
+            const idx = ascBlocks.findIndex(b => this.getSpec(b.prefix).usable >= sc.requiredHosts);
+            if (idx === -1) {
+              unsatisfied.push(`${sc.label} needs ${sc.requiredHosts} usable hosts (requires at least a /${sc.optimalPrefix} with ${this.getSpec(sc.optimalPrefix).usable} usable hosts).`);
+            } else {
+              const chosen = ascBlocks[idx];
+              if (chosen.prefix < sc.optimalPrefix) {
+                wastedBlocks++;
+              }
+              ascBlocks.splice(idx, 1);
+            }
+          });
+
+          if (unsatisfied.length > 0) {
+            box.classList.add("error");
+            titleEl.style.color = "#FDA4AF";
+            titleEl.textContent = "HOST CAPACITY DEFICIT";
+            bodyEl.innerHTML = `<ul style="margin-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem;">${unsatisfied.map(u => `<li>${u}</li>`).join("")}</ul>`;
+          } else if (wastedBlocks > 0) {
+            box.classList.add("warn");
+            titleEl.style.color = "var(--gold-400)";
+            titleEl.textContent = "MISSION PASSED // SUB-OPTIMAL VLSM EFFICIENCY";
+            const optimalList = scenarios.map(s => `${s.label}: /${s.optimalPrefix}`).join(" | ");
+            bodyEl.innerHTML = `All host requirements are satisfied, but ${wastedBlocks} subnet(s) used a larger block than necessary. Optimal VLSM sizing: <span style="font-family: var(--font-mono); color: var(--gold-300);">${optimalList}</span>.`;
+          } else {
+            box.classList.add("success");
+            titleEl.style.color = "var(--emerald-400)";
+            titleEl.textContent = "OUTSTANDING // OPTIMAL VLSM EFFICIENCY";
+            bodyEl.innerHTML = `Every operational enclave has sufficient usable host IPs using the tightest possible CIDR mask with zero wasted address blocks!`;
+          }
+        }
+      },
+
+      resetFeedbackBox() {
+        const box = document.getElementById("mission-feedback-box");
+        const titleEl = document.getElementById("feedback-title");
+        const bodyEl = document.getElementById("feedback-body");
+        box.className = "feedback-box";
+        titleEl.style.color = "var(--gold-400)";
+        titleEl.textContent = "Allocation Readiness Status";
+        bodyEl.innerHTML = "Drag subnet blocks from the palette onto valid aligned slots on the address bar, then click <strong>Verify Allocation</strong> to grade your layout.";
+      },
+
+      /* =====================================================================
+         HELPERS & EDUCATIONAL TOASTS
+         ===================================================================== */
+      getSpec(prefix) {
+        return SUBNET_SPECS.find(s => s.prefix === Number(prefix));
+      },
+
+      showAlert(title, message, isError = false) {
+        const alertEl = document.getElementById("edu-alert");
+        document.getElementById("edu-alert-title").textContent = title;
+        document.getElementById("edu-alert-body").textContent = message;
+
+        alertEl.classList.toggle("error-alert", isError);
+        alertEl.classList.add("visible");
+
+        clearTimeout(this._alertTimer);
+        this._alertTimer = setTimeout(() => {
+          alertEl.classList.remove("visible");
+        }, 4800);
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => app.init());
+  </script>
+</body>
+</html>
