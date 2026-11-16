@@ -7,15 +7,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #001233 0%, #00205B 55%, #001845 100%);
             min-height: 100vh;
         }
+        .navy-gold-gradient {
+            background: linear-gradient(135deg, #00205B 0%, #003594 100%);
+            border-bottom: 3px solid #C59B27;
+        }
         .project-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(197, 155, 39, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
         .project-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: #C59B27;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 18px rgba(197, 155, 39, 0.2);
         }
     </style>
 </head>
@@ -23,92 +29,79 @@
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-16 mt-8">
-            <h1 class="text-6xl font-bold text-white mb-4">My Projects</h1>
-            <p class="text-xl text-purple-100">A collection of one-shot experiments and creative builds</p>
+            <h1 class="text-5xl md:text-6xl font-bold text-white tracking-tight mb-3">
+                My Projects
+            </h1>
+            <div class="w-24 h-1 bg-[#C59B27] mx-auto rounded-full mb-4"></div>
+            <p class="text-xl text-blue-100/90">A collection of one-shot experiments and creative builds</p>
         </div>
 
         <!-- Projects Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             <!-- Project Card: watchbill maker -->
-            <a href="/watchbill/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block">
-                <div class="h-48 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <a href="/watchbill/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block group">
+                <div class="h-48 navy-gold-gradient flex items-center justify-center">
+                    <svg class="w-24 h-24 text-[#D4AF37] group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Watchbill Maker</h3>
-                    <p class="text-gray-600 mb-4">Watchbill Maker for Boats</p>
+                    <h3 class="text-2xl font-bold text-[#00205B] mb-2">Watchbill Maker</h3>
+                    <p class="text-slate-600 mb-4">Watchbill Maker for Boats</p>
                     <div class="flex gap-2 flex-wrap">
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">HTML/JS/CSS</span>
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">Functional</span>
+                        <span class="px-3 py-1 bg-[#00205B]/10 text-[#00205B] font-medium rounded-full text-sm">HTML/JS/CSS</span>
+                        <span class="px-3 py-1 bg-[#C59B27]/20 text-[#8a6a12] font-medium rounded-full text-sm">Functional</span>
                     </div>
                 </div>
             </a>
             
-            <!-- Project Card: Bookshelf -->
-            <a href="/bookshelf/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block">
-                <div class="h-48 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <!-- Project Card: IWTC Subnets -->
+            <a href="/IWTC_Subnets/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block group">
+                <div class="h-48 navy-gold-gradient flex items-center justify-center">
+                    <svg class="w-24 h-24 text-[#D4AF37] group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
                     </svg>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Bookshelf</h3>
-                    <p class="text-gray-600 mb-4">Interactive bookshelf where I post book reports. Click on book spines to read my reviews.</p>
+                    <h3 class="text-2xl font-bold text-[#00205B] mb-2">IWTC Subnets</h3>
+                    <p class="text-slate-600 mb-4">Tools for IWTC instructors</p>
                     <div class="flex gap-2 flex-wrap">
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">React</span>
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">Books</span>
-                    </div>
-                </div>
-            </a>
-            
-            <!-- Project Card: Tuner -->
-            <a href="/tuner/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block">
-                <div class="h-48 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Tuner</h3>
-                    <p class="text-gray-600 mb-4">Interactive accordion tremolo tuner.</p>
-                    <div class="flex gap-2 flex-wrap">
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">React</span>
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">Tuner</span>
+                        <span class="px-3 py-1 bg-[#00205B]/10 text-[#00205B] font-medium rounded-full text-sm">HTML</span>
+                        <span class="px-3 py-1 bg-[#C59B27]/20 text-[#8a6a12] font-medium rounded-full text-sm">NAVY</span>
                     </div>
                 </div>
             </a>
 
-            <!-- Project Card: IWTC -->
-            <a href="/IWTC/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block">
-                <div class="h-48 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <!-- Project Card: IWTC Flashcards -->
+            <a href="/IWTC/" class="project-card bg-white rounded-xl overflow-hidden shadow-lg block group">
+                <div class="h-48 navy-gold-gradient flex items-center justify-center">
+                    <svg class="w-24 h-24 text-[#D4AF37] group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">IWTC</h3>
-                    <p class="text-gray-600 mb-4">Tools for IWTC instructors</p>
+                    <h3 class="text-2xl font-bold text-[#00205B] mb-2">IWTC Flashcards</h3>
+                    <p class="text-slate-600 mb-4">Tools for IWTC instructors</p>
                     <div class="flex gap-2 flex-wrap">
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">HTML</span>
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">NAVY</span>
+                        <span class="px-3 py-1 bg-[#00205B]/10 text-[#00205B] font-medium rounded-full text-sm">HTML</span>
+                        <span class="px-3 py-1 bg-[#C59B27]/20 text-[#8a6a12] font-medium rounded-full text-sm">NAVY</span>
                     </div>
                 </div>
             </a>
 
-            <div class="project-card bg-white rounded-xl overflow-hidden shadow-lg opacity-50">
-                <div class="h-48 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Coming Soon Placeholder -->
+            <div class="project-card bg-white/90 rounded-xl overflow-hidden shadow-lg opacity-60">
+                <div class="h-48 bg-gradient-to-br from-slate-700 to-slate-800 border-b-4 border-slate-500 flex items-center justify-center">
+                    <svg class="w-24 h-24 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Coming Soon</h3>
-                    <p class="text-gray-600 mb-4">Next project placeholder. More experiments on the way!</p>
+                    <h3 class="text-2xl font-bold text-slate-700 mb-2">Coming Soon</h3>
+                    <p class="text-slate-500 mb-4">Next project placeholder. More experiments on the way!</p>
                     <div class="flex gap-2 flex-wrap">
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">TBD</span>
+                        <span class="px-3 py-1 bg-slate-200 text-slate-600 font-medium rounded-full text-sm">TBD</span>
                     </div>
                 </div>
             </div>
@@ -116,7 +109,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-16 text-purple-100">
+        <div class="text-center mt-16 text-blue-200/80">
             <p class="text-sm">Built with curiosity and too much coffee ☕</p>
         </div>
     </div>
@@ -127,10 +120,9 @@
     2. Put your project files inside that folder with an index.html
     3. Copy the "Project Card" block above (starting with <a href=...)
     4. Update:
-       - href="/your-project-folder-name"
+       - href="/your-project-folder-name/"
        - The icon SVG or use a different one
        - Title, description, and tags
-       - Background gradient colors (from-COLOR-### to-COLOR-###)
     -->
 </body>
 </html>
