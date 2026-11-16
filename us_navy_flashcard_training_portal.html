@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>USN Technical Training | Flashcard Study Portal</title>
+  
+  <!-- Tailwind CSS via CDN (No build steps required for GitHub Pages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono for technical terms -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Custom Tailwind Theme Extension -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            navy: {
+              950: '#001233',
+              900: '#00205B', // Official US Navy Blue
+              800: '#0A2E73',
+              700: '#163F8C',
+              100: '#E6ECF5',
+              50:  '#F4F7FB'
+            },
+            gold: {
+              600: '#A67F18',
+              500: '#C59B27', // Official US Navy Gold
+              400: '#D4AF37', // Metallic Gold Accent
+              100: '#FBF5E3',
+              50:  '#FDFBF3'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 3D Flashcard Flip Mechanics */
+    .perspective-1000 {
+      perspective: 1200px;
+    }
+
+    .preserve-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .backface-hidden {
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Subtle tactical grid background for header */
+    .navy-grid-bg {
+      background-color: #00205B;
+      background-image: 
+        radial-gradient(rgba(212, 175, 55, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 18, 51, 0.2), rgba(0, 18, 51, 0.65));
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4F7FB;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-gold-400 selection:text-navy-950">
+
+  <!-- ===================================================================== -->
+  <!-- TOP NAVIGATION & COMMAND HEADER                                       -->
+  <!-- ===================================================================== -->
+  <header class="navy-grid-bg text-white border-b-4 border-gold-500 shadow-lg sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <!-- Brand / Title -->
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="app.goHome()">
+        <!-- Custom SVG Anchor / Shield Emblem -->
+        <div class="w-11 h-11 rounded-xl bg-navy-950 border-2 border-gold-400 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 text-gold-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="3"></circle>
+            <line x1="12" y1="22" x2="12" y2="8"></line>
+            <path d="M5 12H2a10 10 0 0 0 20 0h-3"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold tracking-widest uppercase text-gold-400">USN Technical Readiness</span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Fleet Flashcard Trainer</h1>
+        </div>
+      </div>
+
+      <!-- Breadcrumb / Quick Course Switcher -->
+      <nav id="top-nav-controls" class="flex items-center gap-2 flex-wrap">
+        <button onclick="app.goHome()" class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-navy-800 hover:bg-navy-700 text-white border border-navy-700 transition flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          All Courses
+        </button>
+        <div id="active-course-badge" class="hidden px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-gold-500 text-navy-950 shadow-sm">
+          <!-- Populated dynamically -->
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT VIEWPORT                                                 -->
+  <!-- ===================================================================== -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Toast Notification Banner (Replaces alert) -->
+    <div id="toast-banner" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-navy-900 text-white border-l-4 border-gold-400 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300">
+      <svg class="w-5 h-5 text-gold-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span id="toast-message" class="text-sm font-medium"></span>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: COURSE SELECTION LANDING                                    -->
+    <!-- =================================================================== -->
+    <section id="view-courses" class="space-y-8">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-2 max-w-2xl">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gold-100 text-gold-600 border border-gold-400/40">
+            Curriculum Selection
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy-900 tracking-tight">Select a Training Track</h2>
+          <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+            Choose a technical discipline below to drill individual chapters or build a multi-chapter <strong class="text-navy-900">Combination Exam Deck</strong>.
+          </p>
+        </div>
+        <div class="flex items-center gap-4 bg-navy-50 px-5 py-4 rounded-xl border border-navy-100 shrink-0">
+          <div class="text-right">
+            <div id="total-courses-stat" class="text-2xl font-extrabold text-navy-900">0</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Courses</div>
+          </div>
+          <div class="h-8 w-px bg-slate-300"></div>
+          <div>
+            <div id="total-cards-stat" class="text-2xl font-extrabold text-gold-600">0</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Cards</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Cards Grid -->
+      <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: MODULE SELECTOR & COMBINATION MODE BUILDER                  -->
+    <!-- =================================================================== -->
+    <section id="view-modules" class="hidden space-y-6">
+      <!-- Course Header Card -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <button onclick="app.goHome()" class="text-xs font-bold uppercase tracking-wider text-navy-700 hover:text-gold-600 flex items-center gap-1 mb-2 transition">
+            &larr; Back to Courses
+          </button>
+          <h2 id="module-view-course-title" class="text-2xl sm:text-3xl font-extrabold text-navy-900">Course Title</h2>
+          <p id="module-view-course-desc" class="text-slate-600 text-sm mt-1">Course description goes here.</p>
+        </div>
+
+        <!-- Mode Switcher Tabs -->
+        <div class="inline-flex p-1.5 bg-slate-100 rounded-xl border border-slate-200 self-start sm:self-center">
+          <button id="tab-single-mode" onclick="app.setSelectionMode('single')" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm bg-navy-900 text-white">
+            Single Module
+          </button>
+          <button id="tab-combo-mode" onclick="app.setSelectionMode('combo')" class="px-4 py-2 rounded-lg text-sm font-bold transition text-slate-600 hover:text-navy-900 flex items-center gap-1.5">
+            <span>Combination Mode</span>
+            <span class="px-1.5 py-0.5 text-[10px] uppercase tracking-wider rounded bg-gold-400 text-navy-950 font-extrabold">Exam Prep</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- COMBINATION MODE CONTROL BAR (Visible only in Combination Mode) -->
+      <div id="combo-control-panel" class="hidden bg-navy-900 text-white rounded-2xl p-6 shadow-md border-2 border-gold-500">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-gold-400 animate-pulse"></span>
+              <h3 class="text-lg font-bold text-gold-400">Combination Exam Builder</h3>
+            </div>
+            <p class="text-sm text-navy-100">
+              Check two or more modules below to merge their flashcards into a comprehensive test deck.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="app.selectAllModules(true)" class="px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-navy-800 hover:bg-navy-700 text-white border border-navy-700 transition">
+              Select All
+            </button>
+            <button onclick="app.selectAllModules(false)" class="px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-navy-800 hover:bg-navy-700 text-slate-300 border border-navy-700 transition">
+              Clear
+            </button>
+
+            <!-- Shuffle Toggle -->
+            <label class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-navy-950/60 border border-navy-700 cursor-pointer select-none">
+              <input id="combo-shuffle-checkbox" type="checkbox" checked class="w-4 h-4 accent-gold-500 rounded cursor-pointer">
+              <span class="text-xs font-bold uppercase tracking-wider text-gold-400">Shuffle Deck</span>
+            </label>
+
+            <!-- Launch Button -->
+            <button id="launch-combo-btn" onclick="app.launchCombinationDeck()" class="px-5 py-2.5 rounded-xl text-sm font-extrabold bg-gold-500 hover:bg-gold-400 text-navy-950 shadow-lg transition transform active:scale-95 flex items-center gap-2">
+              <span>Start Exam Deck (<span id="combo-selected-count">0</span> Cards)</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modules Grid -->
+      <div id="modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 3: ACTIVE FLASHCARD STUDY DECK                                 -->
+    <!-- =================================================================== -->
+    <section id="view-study" class="hidden max-w-3xl mx-auto space-y-6">
+      
+      <!-- Top Session Controls & Progress -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <button onclick="app.returnToModules()" class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-100 hover:bg-slate-200 text-navy-900 transition flex items-center gap-1.5">
+            &larr; Change Module
+          </button>
+
+          <div class="text-center">
+            <span id="study-deck-title" class="text-sm sm:text-base font-extrabold text-navy-900">Deck Title</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="app.shuffleCurrentDeck()" title="Shuffle remaining deck" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-navy-50 hover:bg-navy-100 text-navy-900 border border-navy-200 transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Shuffle
+            </button>
+            <button onclick="app.restartCurrentDeck()" title="Reset deck progress" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Bar & Stats -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span id="study-progress-text" class="text-navy-900">Card 1 of 10</span>
+            <div class="flex items-center gap-3">
+              <span class="text-emerald-700">Mastered: <span id="stat-mastered">0</span></span>
+              <span class="text-amber-700">Needs Review: <span id="stat-review">0</span></span>
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+            <div id="study-progress-bar" class="h-full bg-gradient-to-r from-navy-900 to-gold-500 transition-all duration-300" style="width: 10%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D FLASHCARD CONTAINER -->
+      <div id="flashcard-stage" class="perspective-1000 w-full">
+        <div id="flashcard-inner" onclick="app.flipCard()" class="relative w-full min-h-[340px] sm:min-h-[380px] preserve-3d cursor-pointer select-none">
+          
+          <!-- FRONT FACE (QUESTION) -->
+          <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border-2 border-slate-200 hover:border-navy-700 transition-colors p-6 sm:p-10 flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-navy-900 text-gold-400">
+                Question
+              </span>
+              <span id="card-module-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 truncate max-w-[60%]">
+                Module Name
+              </span>
+            </div>
+
+            <div class="my-auto py-6 text-center">
+              <p id="card-question-text" class="text-xl sm:text-2xl font-bold text-navy-950 leading-snug">
+                Question prompt loads here...
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-400 border-t border-slate-100 pt-4">
+              <span>Click card or press <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono">Space</kbd> to reveal</span>
+              <span id="card-status-pill" class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-bold"></span>
+            </div>
+          </div>
+
+          <!-- BACK FACE (ANSWER) -->
+          <div class="absolute inset-0 backface-hidden rotate-y-180 bg-navy-950 text-white rounded-3xl shadow-xl border-2 border-gold-500 p-6 sm:p-10 flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-gold-500 text-navy-950">
+                Answer
+              </span>
+              <span id="card-module-badge-back" class="px-3 py-1 rounded-full text-xs font-semibold bg-navy-900 text-gold-400 border border-navy-700 truncate max-w-[60%]">
+                Module Name
+              </span>
+            </div>
+
+            <div class="my-auto py-6 text-center space-y-4">
+              <p id="card-answer-text" class="text-lg sm:text-xl font-medium text-white leading-relaxed">
+                Detailed technical answer loads here...
+              </p>
+            </div>
+
+            <!-- Self-Grading Controls inside Back Face (stopPropagation prevents accidental re-flip) -->
+            <div onclick="event.stopPropagation()" class="border-t border-navy-800 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-navy-200">Mark your recall proficiency:</span>
+              <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="app.gradeCard('review')" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 transition flex items-center justify-center gap-1.5">
+                  <span>&#9888; Needs Review</span>
+                </button>
+                <button onclick="app.gradeCard('mastered')" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-emerald-500 hover:bg-emerald-400 text-navy-950 shadow transition flex items-center justify-center gap-1.5">
+                  <span>&#10003; Mastered</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NAVIGATION CONTROLS BAR -->
+      <div class="flex items-center justify-between gap-4">
+        <button id="btn-prev-card" onclick="app.prevCard()" class="px-5 py-3 rounded-xl font-bold text-sm bg-white hover:bg-slate-50 text-navy-900 border border-slate-300 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+          Previous
+        </button>
+
+        <button onclick="app.flipCard()" class="px-6 py-3 rounded-xl font-extrabold text-sm bg-navy-900 hover:bg-navy-800 text-gold-400 border border-navy-700 shadow-md transition">
+          Flip Card
+        </button>
+
+        <button id="btn-next-card" onclick="app.nextCard()" class="px-5 py-3 rounded-xl font-bold text-sm bg-gold-500 hover:bg-gold-400 text-navy-950 shadow-sm transition flex items-center gap-2">
+          <span id="btn-next-label">Next</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Keyboard Shortcut Legend -->
+      <div class="text-center text-xs text-slate-500 pt-1">
+        Keyboard Shortcuts: <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono">Space</kbd> Flip &bull; 
+        <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono">&larr;</kbd> / <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono">&rarr;</kbd> Navigate &bull; 
+        <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono">1</kbd> Needs Review &bull; 
+        <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono">2</kbd> Mastered
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 4: DECK COMPLETION SUMMARY SCREEN                              -->
+    <!-- =================================================================== -->
+    <section id="view-summary" class="hidden max-w-2xl mx-auto">
+      <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border-2 border-gold-500 text-center space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-navy-900 border-2 border-gold-400 text-gold-400 mx-auto flex items-center justify-center shadow-md">
+          <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+
+        <div class="space-y-2">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-gold-600">Evolution Complete</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-navy-900">Deck Summary</h2>
+          <p id="summary-deck-subtitle" class="text-sm text-slate-600">Module Name</p>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="grid grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+          <div>
+            <div id="summary-total" class="text-2xl font-extrabold text-navy-900">0</div>
+            <div class="text-xs font-bold uppercase text-slate-500 mt-1">Total Cards</div>
+          </div>
+          <div>
+            <div id="summary-mastered" class="text-2xl font-extrabold text-emerald-600">0</div>
+            <div class="text-xs font-bold uppercase text-slate-500 mt-1">Mastered</div>
+          </div>
+          <div>
+            <div id="summary-review" class="text-2xl font-extrabold text-amber-600">0</div>
+            <div class="text-xs font-bold uppercase text-slate-500 mt-1">Needs Review</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button id="btn-review-missed" onclick="app.studyMissedOnly()" class="w-full sm:w-auto px-6 py-3 rounded-xl font-extrabold text-sm bg-amber-500 hover:bg-amber-400 text-navy-950 shadow-md transition">
+            Drill Missed Cards (<span id="summary-missed-btn-count">0</span>)
+          </button>
+          <button onclick="app.restartCurrentDeck()" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-navy-900 hover:bg-navy-800 text-white shadow-md transition">
+            Restart Full Deck
+          </button>
+          <button onclick="app.returnToModules()" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-navy-900 transition">
+            Back to Modules
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER                                                                -->
+  <!-- ===================================================================== -->
+  <footer class="bg-navy-950 text-slate-400 border-t border-navy-800 py-6 px-4 text-center text-xs">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>USN Information Warfare &amp; Systems Training &bull; Static Flashcard Platform</span>
+      <span class="text-gold-400/80 font-mono">Hosted via GitHub Pages</span>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION DATA & LOGIC                                              -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * ADMINISTRATOR CONFIGURATION: COURSE_DATA
+     * =========================================================================
+     * How to add or edit courses, modules, and flashcards:
+     * 1. Each object inside `COURSE_DATA` represents a top-level Course.
+     * 2. Inside each course, `modules` is an array of chapters/lessons.
+     * 3. Inside each module, `cards` is an array of `{ q: "Question", a: "Answer" }`.
+     * 4. Ensure every `id` string is unique across the file.
+     * =========================================================================
+     */
+    const COURSE_DATA = [
+      {
+        id: "networking",
+        title: "Networking Fundamentals",
+        code: "NET-101",
+        description: "Core enterprise networking protocols, OSI encapsulation, IPv4/IPv6 subnetting, switching, and dynamic routing.",
+        modules: [
+          {
+            id: "net-mod-1",
+            title: "Module 1: OSI & TCP/IP Models",
+            description: "Protocol layers, PDU encapsulation, and standard network ports.",
+            cards: [
+              {
+                q: "What are the 7 layers of the OSI Model from Layer 1 (bottom) to Layer 7 (top)?",
+                a: "1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application. (Mnemonic: Please Do Not Throw Sausage Pizza Away)"
+              },
+              {
+                q: "What Protocol Data Unit (PDU) is associated with Layers 2, 3, and 4 of the OSI model?",
+                a: "Layer 2 (Data Link): Frame | Layer 3 (Network): Packet | Layer 4 (Transport): Segment (TCP) or Datagram (UDP)."
+              },
+              {
+                q: "Differentiate between TCP and UDP at the Transport Layer.",
+                a: "TCP is connection-oriented, uses a 3-way handshake (SYN, SYN-ACK, ACK), and guarantees reliable, ordered delivery. UDP is connectionless, low-overhead, and best-effort without retransmission."
+              },
+              {
+                q: "Which ports are used by SSH, DNS, HTTP, HTTPS, and SNMP?",
+                a: "SSH: TCP 22 | DNS: TCP/UDP 53 | HTTP: TCP 80 | HTTPS: TCP 443 | SNMP: UDP 161/162."
+              },
+              {
+                q: "What is the primary function of ARP (Address Resolution Protocol)?",
+                a: "ARP resolves a known Layer 3 IPv4 address to an unknown Layer 2 MAC (hardware) address on a local broadcast domain."
+              }
+            ]
+          },
+          {
+            id: "net-mod-2",
+            title: "Module 2: Subnetting & IPv4/IPv6",
+            description: "CIDR notation, subnet masks, private address spaces, and IPv6 addressing.",
+            cards: [
+              {
+                q: "How many usable host IP addresses are available in a /26 IPv4 subnet?",
+                a: "62 usable hosts. A /26 leaves 6 host bits (2^6 = 64 total addresses minus 1 network address and 1 broadcast address = 62)."
+              },
+              {
+                q: "What are the three RFC 1918 private IPv4 address ranges?",
+                a: "10.0.0.0/8 (10.0.0.0 – 10.255.255.255), 172.16.0.0/12 (172.16.0.0 – 172.31.255.255), and 192.168.0.0/16 (192.168.0.0 – 192.168.255.255)."
+              },
+              {
+                q: "What is the subnet mask in dotted-decimal notation for a /27 CIDR prefix?",
+                a: "255.255.255.224 (The last octet has 3 network bits turned on: 128 + 64 + 32 = 224)."
+              },
+              {
+                q: "What prefix identifies an IPv6 Link-Local unicast address?",
+                a: "fe80::/10. Link-local addresses are automatically generated on every IPv6-enabled interface and are non-routable outside the local link."
+              },
+              {
+                q: "What is APIPA and what IPv4 range does it use?",
+                a: "Automatic Private IP Addressing (169.254.0.0/16). A host assigns itself an APIPA address when configured for DHCP but unable to reach a DHCP server."
+              }
+            ]
+          },
+          {
+            id: "net-mod-3",
+            title: "Module 3: Switching, VLANs & Routing",
+            description: "802.1Q trunking, Spanning Tree Protocol, and static vs. dynamic routing.",
+            cards: [
+              {
+                q: "What IEEE standard defines VLAN tagging on Ethernet trunk links?",
+                a: "IEEE 802.1Q, which inserts a 4-byte VLAN tag into the Ethernet frame header to identify traffic belonging to multiple VLANs across a single trunk."
+              },
+              {
+                q: "What problem does Spanning Tree Protocol (STP / 802.1D) prevent?",
+                a: "STP prevents Layer 2 switching loops, broadcast storms, and MAC address table instability in redundant switched topologies by blocking redundant paths."
+              },
+              {
+                q: "What is the difference between a Switch and a Router in terms of collision and broadcast domains?",
+                a: "Each port on a Switch is its own collision domain, but all ports (in the same VLAN) share one broadcast domain. Each interface on a Router separates both collision and broadcast domains."
+              },
+              {
+                q: "What is Administrative Distance (AD) in routing?",
+                a: "Administrative Distance is a numeric value (0–255) that ranks the trustworthiness of a routing source. Lower AD is preferred (e.g., Connected = 0, Static = 1, OSPF = 110, RIP = 120)."
+              },
+              {
+                q: "What is the purpose of a Default Gateway?",
+                a: "A Default Gateway is the Layer 3 router interface IP address to which a host sends packets destined for remote networks outside its local subnet."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "azure-fundamentals",
+        title: "Azure Cloud Fundamentals",
+        code: "AZ-900",
+        description: "Cloud service models, Azure global infrastructure, compute/storage services, and Zero Trust governance.",
+        modules: [
+          {
+            id: "az-mod-1",
+            title: "Module 1: Cloud Concepts & Shared Responsibility",
+            description: "IaaS, PaaS, SaaS, CapEx vs. OpEx, and the Shared Responsibility Model.",
+            cards: [
+              {
+                q: "In the Cloud Shared Responsibility Model, which security controls are ALWAYS the customer's responsibility regardless of deployment type?",
+                a: "Information and Data, Devices (Mobile and PCs), and Accounts and Identities."
+              },
+              {
+                q: "Compare IaaS, PaaS, and SaaS in Microsoft Azure.",
+                a: "IaaS (e.g., Azure VMs): You manage OS, runtime, and apps. PaaS (e.g., Azure App Service): Azure manages OS/middleware; you manage apps/data. SaaS (e.g., Microsoft 365): Provider manages everything; you configure users/data."
+              },
+              {
+                q: "What is the difference between Capital Expenditure (CapEx) and Operational Expenditure (OpEx)?",
+                a: "CapEx is upfront spending on physical infrastructure (servers, data centers) deducted over time. OpEx is pay-as-you-go spending on services consumed immediately without upfront hardware costs."
+              },
+              {
+                q: "What is the difference between Horizontal Scaling (Scaling Out) and Vertical Scaling (Scaling Up)?",
+                a: "Vertical Scaling adds more CPU/RAM to an existing VM. Horizontal Scaling adds more VM instances behind a load balancer to handle increased demand."
+              }
+            ]
+          },
+          {
+            id: "az-mod-2",
+            title: "Module 2: Core Azure Architecture & Compute",
+            description: "Regions, Availability Zones, Resource Groups, VMs, and Virtual Networks.",
+            cards: [
+              {
+                q: "What is an Azure Availability Zone?",
+                a: "Physically separate datacenters within an Azure Region, each equipped with independent power, cooling, and networking to protect workloads from datacenter-level failures."
+              },
+              {
+                q: "What are the 4 hierarchical levels of Azure Resource Management from top to bottom?",
+                a: "1. Management Groups, 2. Subscriptions, 3. Resource Groups, 4. Resources."
+              },
+              {
+                q: "Can an Azure Resource belong to multiple Resource Groups simultaneously?",
+                a: "No. Every Azure resource can exist in only one Resource Group at a time, though resources within a group can reside in different Azure regions."
+              },
+              {
+                q: "What is the function of an Azure Network Security Group (NSG)?",
+                a: "An NSG acts as a stateful Layer 3/4 packet filter containing inbound and outbound security rules (5-tuple: source IP, source port, dest IP, dest port, protocol) applied to subnets or NICs."
+              },
+              {
+                q: "What are the four main data services inside an Azure Storage Account?",
+                a: "Azure Blob Storage (unstructured objects), Azure Files (SMB/NFS managed shares), Azure Queue Storage (messaging), and Azure Table Storage (NoSQL key-value)."
+              }
+            ]
+          },
+          {
+            id: "az-mod-3",
+            title: "Module 3: Identity, Governance & Security",
+            description: "Microsoft Entra ID, RBAC, Azure Policy, Resource Locks, and Defense in Depth.",
+            cards: [
+              {
+                q: "What is the difference between Authentication (AuthN) and Authorization (AuthZ) in Microsoft Entra ID?",
+                a: "Authentication verifies who a user or service is (proving identity via password/MFA). Authorization determines what actions and resources that authenticated identity is permitted to access (via RBAC)."
+              },
+              {
+                q: "How does Azure Policy differ from Role-Based Access Control (RBAC)?",
+                a: "RBAC controls WHO can perform actions on resources. Azure Policy enforces organizational standards and compliance on WHAT configurations are allowed (e.g., restricting allowed VM SKUs or regions)."
+              },
+              {
+                q: "What are the two types of Azure Resource Locks and what do they prevent?",
+                a: "CanNotDelete (allows reading and modifying, blocks deletion) and ReadOnly (allows reading only, blocks both modification and deletion)."
+              },
+              {
+                q: "What are the three guiding principles of the Zero Trust security model?",
+                a: "1. Verify explicitly, 2. Use least privilege access, 3. Assume breach."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "linux-admin",
+        title: "Linux System Administration",
+        code: "LNX-201",
+        description: "Filesystem hierarchy, chmod/chown permissions, systemd services, process control, and shell diagnostics.",
+        modules: [
+          {
+            id: "lnx-mod-1",
+            title: "Module 1: Filesystem & Permissions",
+            description: "FHS directories, octal permissions, ownership, and links.",
+            cards: [
+              {
+                q: "What is stored in the /etc, /var, and /dev directories in the Linux Filesystem Hierarchy Standard (FHS)?",
+                a: "/etc: System-wide host configuration files | /var: Variable data such as logs (/var/log), spools, and caches | /dev: Device nodes representing hardware and virtual devices."
+              },
+              {
+                q: "What permissions does `chmod 750 script.sh` assign to User, Group, and Others?",
+                a: "User (Owner): rwx (4+2+1=7) | Group: r-x (4+0+1=5) | Others: --- (0). Only the owner can execute/modify; group members can read/execute; others have no access."
+              },
+              {
+                q: "What is the difference between a Hard Link and a Symbolic (Soft) Link?",
+                a: "A Hard Link points directly to the same inode on the same filesystem (survives deletion of the original filename). A Symbolic Link (`ln -s`) points to a file path and breaks if the target is moved or deleted."
+              },
+              {
+                q: "Which command recursively changes both the owner and group of `/var/www` to `www-data`?",
+                a: "`chown -R www-data:www-data /var/www`"
+              }
+            ]
+          },
+          {
+            id: "lnx-mod-2",
+            title: "Module 2: Process & Service Management",
+            description: "systemd units, signals, top/ps monitoring, and job control.",
+            cards: [
+              {
+                q: "What is the difference between `systemctl enable sshd` and `systemctl start sshd`?",
+                a: "`start` launches the service immediately in the current session. `enable` configures the service to start automatically at system boot (use `--now` to do both)."
+              },
+              {
+                q: "Explain the difference between `kill -15 <PID>` (SIGTERM) and `kill -9 <PID>` (SIGKILL).",
+                a: "SIGTERM (15) politely requests a process to terminate, allowing it to save state and clean up resources. SIGKILL (9) forces the kernel to terminate the process immediately without cleanup."
+              },
+              {
+                q: "How do you view systemd journal logs specifically for the `nginx` service since the last boot?",
+                a: "`journalctl -u nginx -b`"
+              },
+              {
+                q: "What command displays running processes in a full-format listing and filters for `sshd`?",
+                a: "`ps aux | grep sshd` or `ps -ef | grep sshd`"
+              }
+            ]
+          },
+          {
+            id: "lnx-mod-3",
+            title: "Module 3: Networking & Shell Utilities",
+            description: "Socket inspection, text processing pipes, SSH, and disk diagnostics.",
+            cards: [
+              {
+                q: "Which modern Linux command replaces `netstat` to display listening TCP and UDP sockets along with process names?",
+                a: "`ss -tulnp` (t = TCP, u = UDP, l = listening, n = numeric ports, p = process info)."
+              },
+              {
+                q: "What do the redirection operators `>`, `>>`, and `2>&1` do in Bash?",
+                a: "`>` overwrites a file with stdout; `>>` appends stdout to a file; `2>&1` redirects stderr (file descriptor 2) to the same destination as stdout (file descriptor 1)."
+              },
+              {
+                q: "How do you check human-readable disk space usage across mounted filesystems vs. the size of a specific directory?",
+                a: "`df -h` checks mounted filesystem free/used space; `du -sh /path/to/dir` calculates the total size of a specific directory."
+              },
+              {
+                q: "Which command securely copies `backup.tar.gz` from a local host to `/tmp` on remote host `10.10.1.5` as user `admin`?",
+                a: "`scp backup.tar.gz admin@10.10.1.5:/tmp`"
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * APPLICATION CONTROLLER & STATE MANAGEMENT
+     * =========================================================================
+     */
+    const app = {
+      state: {
+        currentView: 'courses', // 'courses' | 'modules' | 'study' | 'summary'
+        selectedCourseId: null,
+        selectionMode: 'single', // 'single' | 'combo'
+        selectedModuleIds: new Set(),
+
+        // Active Study Deck State
+        deckTitle: '',
+        activeDeck: [],        // Array of { id, q, a, moduleTitle, status: 'unseen' | 'mastered' | 'review' }
+        originalDeck: [],      // Copy for full reset
+        currentIndex: 0,
+        isFlipped: false
+      },
+
+      /**
+       * Initialize application on page load
+       */
+      init() {
+        this.renderCourses();
+        this.bindKeyboardShortcuts();
+      },
+
+      /**
+       * Show non-intrusive toast message
+       */
+      showToast(message) {
+        const banner = document.getElementById('toast-banner');
+        const msgEl = document.getElementById('toast-message');
+        msgEl.textContent = message;
+        banner.classList.remove('hidden');
+
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 3200);
+      },
+
+      /**
+       * Switch active view section cleanly
+       */
+      switchView(viewName) {
+        this.state.currentView = viewName;
+        ['courses', 'modules', 'study', 'summary'].forEach(v => {
+          document.getElementById(`view-${v}`).classList.add('hidden');
+        });
+        document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      /**
+       * Return to Course Selection Home
+       */
+      goHome() {
+        this.state.selectedCourseId = null;
+        document.getElementById('active-course-badge').classList.add('hidden');
+        this.renderCourses();
+        this.switchView('courses');
+      },
+
+      /**
+       * Render Top-Level Courses Grid
+       */
+      renderCourses() {
+        const grid = document.getElementById('courses-grid');
+        grid.innerHTML = '';
+
+        let totalCards = 0;
+
+        COURSE_DATA.forEach(course => {
+          const courseCardCount = course.modules.reduce((sum, mod) => sum + mod.cards.length, 0);
+          totalCards += courseCardCount;
+
+          const cardEl = document.createElement('div');
+          cardEl.className = "bg-white rounded-2xl border-2 border-slate-200 hover:border-gold-500 shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden group cursor-pointer";
+          cardEl.onclick = () => this.selectCourse(course.id);
+
+          cardEl.innerHTML = `
+            <div>
+              <div class="bg-navy-900 px-6 py-4 flex items-center justify-between border-b-2 border-gold-500">
+                <span class="font-mono text-xs font-bold tracking-wider uppercase px-2.5 py-1 rounded bg-navy-950 text-gold-400 border border-gold-500/30">
+                  ${course.code}
+                </span>
+                <span class="text-xs font-semibold text-navy-100">
+                  ${course.modules.length} Modules
+                </span>
+              </div>
+              <div class="p-6 space-y-3">
+                <h3 class="text-xl font-extrabold text-navy-900 group-hover:text-navy-700 transition">
+                  ${course.title}
+                </h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  ${course.description}
+                </p>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                ${courseCardCount} Flashcards
+              </span>
+              <span class="text-sm font-extrabold text-navy-900 group-hover:text-gold-600 flex items-center gap-1 transition">
+                Open Course
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+              </span>
+            </div>
+          `;
+
+          grid.appendChild(cardEl);
+        });
+
+        document.getElementById('total-courses-stat').textContent = COURSE_DATA.length;
+        document.getElementById('total-cards-stat').textContent = totalCards;
+      },
+
+      /**
+       * Select a Course and display its Modules
+       */
+      selectCourse(courseId) {
+        const course = COURSE_DATA.find(c => c.id === courseId);
+        if (!course) return;
+
+        this.state.selectedCourseId = courseId;
+        this.state.selectedModuleIds.clear();
+        this.state.selectionMode = 'single';
+
+        // Update Top Nav Badge
+        const badge = document.getElementById('active-course-badge');
+        badge.textContent = `${course.code}: ${course.title}`;
+        badge.classList.remove('hidden');
+
+        // Update Course Header
+        document.getElementById('module-view-course-title').textContent = course.title;
+        document.getElementById('module-view-course-desc').textContent = course.description;
+
+        this.setSelectionMode('single');
+        this.switchView('modules');
+      },
+
+      /**
+       * Toggle between Single Module Mode and Combination Exam Builder Mode
+       */
+      setSelectionMode(mode) {
+        this.state.selectionMode = mode;
+
+        const singleTab = document.getElementById('tab-single-mode');
+        const comboTab = document.getElementById('tab-combo-mode');
+        const comboPanel = document.getElementById('combo-control-panel');
+
+        if (mode === 'single') {
+          singleTab.className = "px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm bg-navy-900 text-white";
+          comboTab.className = "px-4 py-2 rounded-lg text-sm font-bold transition text-slate-600 hover:text-navy-900 flex items-center gap-1.5";
+          comboPanel.classList.add('hidden');
+        } else {
+          comboTab.className = "px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm bg-navy-900 text-white flex items-center gap-1.5";
+          singleTab.className = "px-4 py-2 rounded-lg text-sm font-bold transition text-slate-600 hover:text-navy-900";
+          comboPanel.classList.remove('hidden');
+        }
+
+        this.renderModules();
+        this.updateComboCounter();
+      },
+
+      /**
+       * Render Modules for the currently selected Course
+       */
+      renderModules() {
+        const course = COURSE_DATA.find(c => c.id === this.state.selectedCourseId);
+        if (!course) return;
+
+        const grid = document.getElementById('modules-grid');
+        grid.innerHTML = '';
+
+        const isCombo = this.state.selectionMode === 'combo';
+
+        course.modules.forEach((mod, idx) => {
+          const isSelected = this.state.selectedModuleIds.has(mod.id);
+
+          const card = document.createElement('div');
+          card.className = `rounded-2xl p-6 transition-all duration-200 cursor-pointer flex flex-col justify-between border-2 ${
+            isCombo && isSelected
+              ? 'bg-gold-50 border-gold-500 shadow-md ring-2 ring-gold-400/40'
+              : 'bg-white border-slate-200 hover:border-navy-700 shadow-sm hover:shadow-md'
+          }`;
+
+          card.onclick = () => {
+            if (isCombo) {
+              this.toggleModuleSelection(mod.id);
+            } else {
+              this.launchSingleModule(mod.id);
+            }
+          };
+
+          card.innerHTML = `
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <span class="px-2.5 py-1 rounded-md text-xs font-extrabold uppercase tracking-wider bg-navy-100 text-navy-900">
+                  Chapter ${idx + 1}
+                </span>
+                ${
+                  isCombo
+                    ? `<div class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${
+                        isSelected ? 'bg-navy-900 border-navy-900 text-gold-400' : 'border-slate-300 bg-white'
+                      }">
+                        ${isSelected ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+                      </div>`
+                    : `<span class="text-xs font-bold text-slate-400">${mod.cards.length} Cards</span>`
+                }
+              </div>
+
+              <h3 class="text-lg font-extrabold text-navy-900 leading-snug">
+                ${mod.title}
+              </h3>
+
+              <p class="text-sm text-slate-600 leading-relaxed">
+                ${mod.description}
+              </p>
+            </div>
+
+            <div class="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500">${mod.cards.length} Flashcards</span>
+              <span class="text-xs font-extrabold uppercase tracking-wider ${
+                isCombo
+                  ? (isSelected ? 'text-gold-600' : 'text-slate-400')
+                  : 'text-navy-900 flex items-center gap-1'
+              }">
+                ${isCombo ? (isSelected ? 'Included in Exam' : 'Click to Select') : 'Launch Deck &rarr;'}
+              </span>
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+      },
+
+      /**
+       * Toggle checkbox selection for a module in Combination Mode
+       */
+      toggleModuleSelection(moduleId) {
+        if (this.state.selectedModuleIds.has(moduleId)) {
+          this.state.selectedModuleIds.delete(moduleId);
+        } else {
+          this.state.selectedModuleIds.add(moduleId);
+        }
+        this.renderModules();
+        this.updateComboCounter();
+      },
+
+      /**
+       * Select All or Clear All modules in Combination Mode
+       */
+      selectAllModules(selectAll) {
+        const course = COURSE_DATA.find(c => c.id === this.state.selectedCourseId);
+        if (!course) return;
+
+        this.state.selectedModuleIds.clear();
+        if (selectAll) {
+          course.modules.forEach(m => this.state.selectedModuleIds.add(m.id));
+        }
+        this.renderModules();
+        this.updateComboCounter();
+      },
+
+      /**
+       * Update selected card count badge in Combination Mode bar
+       */
+      updateComboCounter() {
+        const course = COURSE_DATA.find(c => c.id === this.state.selectedCourseId);
+        if (!course) return;
+
+        let totalSelectedCards = 0;
+        course.modules.forEach(m => {
+          if (this.state.selectedModuleIds.has(m.id)) {
+            totalSelectedCards += m.cards.length;
+          }
+        });
+
+        document.getElementById('combo-selected-count').textContent = totalSelectedCards;
+      },
+
+      /**
+       * Launch a Single Module Deck
+       */
+      launchSingleModule(moduleId) {
+        const course = COURSE_DATA.find(c => c.id === this.state.selectedCourseId);
+        const mod = course?.modules.find(m => m.id === moduleId);
+        if (!mod) return;
+
+        const deck = mod.cards.map((card, i) => ({
+          id: `${mod.id}-${i}`,
+          q: card.q,
+          a: card.a,
+          moduleTitle: mod.title,
+          status: 'unseen'
+        }));
+
+        this.startStudySession(mod.title, deck, false);
+      },
+
+      /**
+       * Launch a Combined Multi-Chapter Exam Deck
+       */
+      launchCombinationDeck() {
+        const course = COURSE_DATA.find(c => c.id === this.state.selectedCourseId);
+        if (!course) return;
+
+        if (this.state.selectedModuleIds.size === 0) {
+          this.showToast("Please select at least one module to build a Combination Deck.");
+          return;
+        }
+
+        let combinedDeck = [];
+        let selectedCount = 0;
+
+        course.modules.forEach(mod => {
+          if (this.state.selectedModuleIds.has(mod.id)) {
+            selectedCount++;
+            mod.cards.forEach((card, i) => {
+              combinedDeck.push({
+                id: `${mod.id}-${i}`,
+                q: card.q,
+                a: card.a,
+                moduleTitle: mod.title,
+                status: 'unseen'
+              });
+            });
+          }
+        });
+
+        const shouldShuffle = document.getElementById('combo-shuffle-checkbox').checked;
+        const deckTitle = `${course.code} Combination Exam (${selectedCount} Modules)`;
+
+        this.startStudySession(deckTitle, combinedDeck, shouldShuffle);
+      },
+
+      /**
+       * Initialize and display the Active Flashcard Study View
+       */
+      startStudySession(title, deckCards, shuffle = false) {
+        let preparedDeck = deckCards.map(c => ({ ...c, status: 'unseen' }));
+        if (shuffle) {
+          preparedDeck = this.shuffleArray(preparedDeck);
+        }
+
+        this.state.deckTitle = title;
+        this.state.originalDeck = preparedDeck.map(c => ({ ...c }));
+        this.state.activeDeck = preparedDeck;
+        this.state.currentIndex = 0;
+        this.state.isFlipped = false;
+
+        document.getElementById('study-deck-title').textContent = title;
+        this.renderActiveCard();
+        this.switchView('study');
+      },
+
+      /**
+       * Return from Study View back to Module List
+       */
+      returnToModules() {
+        this.renderModules();
+        this.switchView('modules');
+      },
+
+      /**
+       * Render the current flashcard and update progress stats
+       */
+      renderActiveCard() {
+        const deck = this.state.activeDeck;
+        const idx = this.state.currentIndex;
+        const card = deck[idx];
+
+        // Ensure card starts unflipped on render
+        const inner = document.getElementById('flashcard-inner');
+        if (this.state.isFlipped) {
+          inner.classList.add('rotate-y-180');
+        } else {
+          inner.classList.remove('rotate-y-180');
+        }
+
+        // Populate Front & Back Text
+        document.getElementById('card-question-text').textContent = card.q;
+        document.getElementById('card-answer-text').textContent = card.a;
+        document.getElementById('card-module-badge').textContent = card.moduleTitle;
+        document.getElementById('card-module-badge-back').textContent = card.moduleTitle;
+
+        // Status Pill on Front Face
+        const statusPill = document.getElementById('card-status-pill');
+        if (card.status === 'mastered') {
+          statusPill.textContent = 'Mastered';
+          statusPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800';
+        } else if (card.status === 'review') {
+          statusPill.textContent = 'Needs Review';
+          statusPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800';
+        } else {
+          statusPill.className = 'hidden';
+        }
+
+        // Progress Bar & Counters
+        const total = deck.length;
+        const masteredCount = deck.filter(c => c.status === 'mastered').length;
+        const reviewCount = deck.filter(c => c.status === 'review').length;
+
+        document.getElementById('study-progress-text').textContent = `Card ${idx + 1} of ${total}`;
+        document.getElementById('stat-mastered').textContent = masteredCount;
+        document.getElementById('stat-review').textContent = reviewCount;
+
+        const pct = Math.round(((idx + 1) / total) * 100);
+        document.getElementById('study-progress-bar').style.width = `${pct}%`;
+
+        // Navigation Button States
+        document.getElementById('btn-prev-card').disabled = idx === 0;
+        document.getElementById('btn-next-label').textContent = idx === total - 1 ? 'Finish Deck' : 'Next';
+      },
+
+      /**
+       * Flip the active flashcard 180 degrees
+       */
+      flipCard() {
+        this.state.isFlipped = !this.state.isFlipped;
+        const inner = document.getElementById('flashcard-inner');
+        if (this.state.isFlipped) {
+          inner.classList.add('rotate-y-180');
+        } else {
+          inner.classList.remove('rotate-y-180');
+        }
+      },
+
+      /**
+       * Mark card as 'mastered' or 'review' and advance automatically
+       */
+      gradeCard(status) {
+        const card = this.state.activeDeck[this.state.currentIndex];
+        card.status = status;
+
+        // Flip back to front before advancing so the next card's answer isn't spoiled
+        this.state.isFlipped = false;
+        document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+
+        setTimeout(() => {
+          this.nextCard();
+        }, 160);
+      },
+
+      /**
+       * Advance to the next card or open Deck Summary at the end
+       */
+      nextCard() {
+        if (this.state.currentIndex < this.state.activeDeck.length - 1) {
+          this.state.currentIndex++;
+          this.state.isFlipped = false;
+          this.renderActiveCard();
+        } else {
+          this.showDeckSummary();
+        }
+      },
+
+      /**
+       * Go back to the previous card
+       */
+      prevCard() {
+        if (this.state.currentIndex > 0) {
+          this.state.currentIndex--;
+          this.state.isFlipped = false;
+          this.renderActiveCard();
+        }
+      },
+
+      /**
+       * Shuffle current active deck in place and restart at index 0
+       */
+      shuffleCurrentDeck() {
+        this.state.activeDeck = this.shuffleArray([...this.state.activeDeck]);
+        this.state.currentIndex = 0;
+        this.state.isFlipped = false;
+        this.renderActiveCard();
+        this.showToast("Deck shuffled.");
+      },
+
+      /**
+       * Reset current deck statuses and start from Card 1
+       */
+      restartCurrentDeck() {
+        const resetCards = this.state.originalDeck.map(c => ({ ...c, status: 'unseen' }));
+        this.startStudySession(this.state.deckTitle, resetCards, false);
+        this.showToast("Deck progress reset.");
+      },
+
+      /**
+       * Display End-of-Deck Summary View
+       */
+      showDeckSummary() {
+        const deck = this.state.activeDeck;
+        const total = deck.length;
+        const mastered = deck.filter(c => c.status === 'mastered').length;
+        const review = deck.filter(c => c.status === 'review').length;
+
+        document.getElementById('summary-deck-subtitle').textContent = this.state.deckTitle;
+        document.getElementById('summary-total').textContent = total;
+        document.getElementById('summary-mastered').textContent = mastered;
+        document.getElementById('summary-review').textContent = review;
+
+        const missedBtn = document.getElementById('btn-review-missed');
+        const missedCountSpan = document.getElementById('summary-missed-btn-count');
+        const unmasteredCards = deck.filter(c => c.status !== 'mastered');
+
+        if (unmasteredCards.length > 0) {
+          missedBtn.classList.remove('hidden');
+          missedCountSpan.textContent = unmasteredCards.length;
+        } else {
+          missedBtn.classList.add('hidden');
+        }
+
+        this.switchView('summary');
+      },
+
+      /**
+       * Filter deck to drill only cards marked 'Needs Review' or left ungraded
+       */
+      studyMissedOnly() {
+        const missed = this.state.activeDeck.filter(c => c.status !== 'mastered');
+        if (missed.length === 0) return;
+
+        this.startStudySession(`${this.state.deckTitle} (Missed Review)`, missed, true);
+      },
+
+      /**
+       * Fisher-Yates Array Shuffle Utility
+       */
+      shuffleArray(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      },
+
+      /**
+       * Global Keyboard Navigation during active study sessions
+       */
+      bindKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if (this.state.currentView !== 'study') return;
+
+          // Ignore if user is typing in an input
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+          if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            this.flipCard();
+          } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            this.nextCard();
+          } else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            this.prevCard();
+          } else if (e.key === '1' && this.state.isFlipped) {
+            e.preventDefault();
+            this.gradeCard('review');
+          } else if (e.key === '2' && this.state.isFlipped) {
+            e.preventDefault();
+            this.gradeCard('mastered');
+          }
+        });
+      }
+    };
+
+    // Boot application once DOM is ready
+    window.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>
